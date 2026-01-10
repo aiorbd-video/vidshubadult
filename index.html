@@ -11,20 +11,21 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet">
 
-    <!-- 1. POPUNDER AD -->
+    <!-- 1. POPUNDER AD (আপনার দেওয়া কোড) -->
     <script src="https://momrollback.com/02/f8/86/02f886f4ac6dd52755b96f56e54b4d57.js"></script>
 
-    <!-- 2. SOCIAL BAR -->
+    <!-- 2. SOCIAL BAR (আপনার দেওয়া কোড) -->
     <script src="https://momrollback.com/dc/95/4d/dc954dbecf4b21d37cedb37de585cf99.js"></script>
 
-    <!-- AD HELPERS -->
+    <!-- 3. SMARTLINK CONFIG -->
     <script>
-        const SMARTLINK = "https://momrollback.com/jnt0mwiv7?key=c244b66638c840b3570508593d8b468e";
-        
-        // 3. 300x250 BANNER FOR FEED (Iframe Safe Mode)
-        function getFeedAd() {
+        const SMARTLINK_URL = "https://momrollback.com/jnt0mwiv7?key=c244b66638c840b3570508593d8b468e";
+        const WORKER_URL = "https://netbongo.aiorbd.workers.dev/?url=";
+
+        // 4. BANNER 300x250 GENERATOR (Feed এর জন্য)
+        function getBannerAd() {
             return `
-                <div style="display:flex; justify-content:center; margin:10px 0; background:#111; padding:10px; border-top:1px solid #333; border-bottom:1px solid #333;">
+                <div style="display:flex; justify-content:center; margin:15px 0; background:#111; padding:10px 0; border-top:1px solid #333; border-bottom:1px solid #333;">
                     <iframe srcdoc="
                         <body style='margin:0;padding:0;background:#111;display:flex;justify-content:center;align-items:center;height:100vh;'>
                             <script type='text/javascript'>
@@ -38,18 +39,16 @@
             `;
         }
 
-        // 4. NATIVE BANNER INJECTOR (For Player)
+        // 5. NATIVE BANNER INJECTOR (Player এর জন্য)
         function injectNativeAd() {
             const container = document.getElementById('nativeAdContainer');
             if(!container) return;
-            container.innerHTML = ''; // Clear old
-
-            // Create container div expected by script
+            container.innerHTML = ''; 
+            
             const adDiv = document.createElement('div');
             adDiv.id = "container-b88712e5e1e497d39ecedaffd47492bc";
             container.appendChild(adDiv);
 
-            // Create script
             const script = document.createElement('script');
             script.async = true;
             script.dataset.cfasync = "false";
@@ -59,19 +58,24 @@
     </script>
 
     <style>
-        body { background-color: #0f0f0f; color: white; font-family: 'Roboto', sans-serif; overflow: hidden; -webkit-tap-highlight-color: transparent; }
+        body { background-color: #0f0f0f; color: white; font-family: 'Roboto', sans-serif; overflow: hidden; -webkit-tap-highlight-color: transparent; user-select: none; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
 
-        /* UI STRUCTURE */
+        /* HEADER */
         #navHeader { position: fixed; top: 0; width: 100%; height: 50px; background: rgba(15,15,15,0.98); z-index: 50; border-bottom: 1px solid #222; display: flex; align-items: center; justify-content: space-between; padding: 0 16px; }
-        #catBar { position: fixed; top: 50px; width: 100%; height: 48px; background: #0f0f0f; z-index: 40; white-space: nowrap; overflow-x: auto; padding: 8px 12px; display: flex; gap: 8px; border-bottom: 1px solid #222; }
-        #scrollArea { height: 100vh; overflow-y: auto; padding-top: 100px; padding-bottom: 80px; scroll-behavior: smooth; }
-
+        
         /* CHIPS */
+        #catBar { position: fixed; top: 50px; width: 100%; height: 48px; background: #0f0f0f; z-index: 40; white-space: nowrap; overflow-x: auto; padding: 8px 12px; display: flex; gap: 8px; border-bottom: 1px solid #222; }
         .chip { padding: 6px 16px; border-radius: 20px; font-size: 14px; cursor: pointer; transition: 0.2s; white-space: nowrap; border: 1px solid #333; background: #222; }
         .chip.active { background-color: white; color: black; font-weight: bold; border-color: white; }
 
-        /* PLAYER ARCHITECTURE */
+        /* SCROLL AREA FIX (Absolute Position) */
+        #scrollArea { 
+            position: absolute; top: 98px; bottom: 60px; left: 0; right: 0;
+            overflow-y: auto; -webkit-overflow-scrolling: touch; 
+        }
+
+        /* --- PLAYER STYLES --- */
         #playerView {
             position: fixed; z-index: 200; background: #0f0f0f;
             transition: transform 0.3s cubic-bezier(0.2, 0, 0.2, 1);
@@ -81,7 +85,7 @@
 
         /* Full Screen */
         .state-full { top: 0; left: 0; width: 100%; height: 100%; transform: translateY(0) !important; display: flex !important; }
-        .state-full #vidWrapper { width: 100%; aspect-ratio: 16/9; background: black; position: relative; z-index: 10; }
+        .state-full #vidWrapper { width: 100%; aspect-ratio: 16/9; background: black; position: relative; z-index: 10; flex-shrink: 0; }
         .state-full #metaData { flex: 1; overflow-y: auto; display: block; z-index: 5; }
         .state-full #miniControlBar { display: none !important; }
 
@@ -96,21 +100,21 @@
         .state-mini #metaData, .state-mini #fullControlBar, .state-mini #tapLayer { display: none !important; }
         .state-mini #miniControlBar { display: flex; position: absolute; inset: 0; z-index: 20; background: rgba(0,0,0,0.3); align-items: center; justify-content: center; }
 
-        /* --- UI FIX: TAP LAYER --- */
-        #tapLayer { position: absolute; inset: 0; z-index: 15; cursor: pointer; }
+        /* --- UI & INTERACTION FIX --- */
+        #tapLayer { position: absolute; inset: 0; z-index: 15; cursor: pointer; background: transparent; }
         
         #fullControlBar {
             position: absolute; inset: 0; z-index: 20;
             display: flex; flex-direction: column; justify-content: space-between;
-            background: rgba(0,0,0,0.6); opacity: 0; transition: opacity 0.2s ease;
-            pointer-events: none; 
+            background: rgba(0,0,0,0.6); opacity: 0; transition: opacity 0.3s ease;
+            pointer-events: none;
         }
         #fullControlBar.show { opacity: 1; pointer-events: auto; }
         .p-btn { pointer-events: auto; }
 
         /* Quality Box */
         #settingsBox { position: absolute; top: 50px; right: 15px; background: rgba(20,20,20,0.98); border: 1px solid #444; border-radius: 8px; padding: 5px; display: none; flex-direction: column; z-index: 100; min-width: 120px; }
-        .opt-item { padding: 10px; font-size: 13px; border-bottom: 1px solid #333; cursor: pointer; }
+        .opt-item { padding: 10px; font-size: 13px; border-bottom: 1px solid #333; cursor: pointer; text-align: left; }
         .opt-item.active { color: red; font-weight: bold; }
 
         /* Slider */
@@ -150,7 +154,7 @@
     <!-- CHIPS -->
     <div id="catBar" class="no-scrollbar"></div>
 
-    <!-- FEED -->
+    <!-- FEED SCROLL AREA -->
     <div id="scrollArea">
         <div id="videoContainer" class="grid grid-cols-1 md:grid-cols-2 gap-y-8 pb-10">
             <!-- Skeleton -->
@@ -159,28 +163,28 @@
                 <div class="flex gap-3 px-2"><div class="w-10 h-10 rounded-full bg-gray-800 skeleton"></div><div class="flex-1 space-y-2"><div class="h-4 bg-gray-800 w-3/4 skeleton"></div><div class="h-3 bg-gray-800 w-1/2 skeleton"></div></div></div>
             </div>
         </div>
-        <!-- SMARTLINK ON LOAD MORE -->
-        <div id="loadMoreDiv" class="text-center py-6 hidden">
-            <button onclick="window.open(SMARTLINK, '_blank'); loadMoreVideos()" class="bg-[#222] px-6 py-2 rounded-full font-bold text-sm border border-[#333] active:bg-white active:text-black">Load More</button>
+        <div id="loadMoreDiv" class="text-center py-8 hidden">
+            <!-- Smartlink on Load More -->
+            <button onclick="window.open(SMARTLINK_URL, '_blank'); loadMoreVideos()" class="bg-[#222] px-8 py-3 rounded-full font-bold text-sm border border-[#333] active:bg-white active:text-black transition">Load More Videos</button>
         </div>
     </div>
 
     <!-- PLAYER -->
     <div id="playerView">
         <div id="vidWrapper">
-            <!-- Direct Video Source (No Worker for Playback) -->
             <video id="vidEl" class="w-full h-full object-contain bg-black" playsinline></video>
             
-            <!-- 1. TAP LAYER (UI FIX) -->
+            <!-- 1. TAP LAYER (Always clickable) -->
             <div id="tapLayer" onclick="toggleControls()"></div>
 
-            <!-- 2. CONTROLS -->
+            <!-- 2. CONTROLS UI -->
             <div id="fullControlBar">
                 <div class="flex justify-between items-start p-3 p-btn">
-                    <button onclick="event.stopPropagation(); minimize()" class="text-white p-2"><i class="fas fa-chevron-down text-2xl"></i></button>
-                    <button onclick="event.stopPropagation(); toggleSettings()" class="text-white p-2"><i class="fas fa-cog text-2xl"></i></button>
+                    <button onclick="event.stopPropagation(); minimize()" class="text-white p-2 bg-black/30 rounded-full"><i class="fas fa-chevron-down text-2xl"></i></button>
+                    <button onclick="event.stopPropagation(); toggleSettings()" class="text-white p-2 bg-black/30 rounded-full"><i class="fas fa-cog text-2xl"></i></button>
                     <div id="settingsBox"></div>
                 </div>
+
                 <div class="absolute inset-0 flex items-center justify-center gap-14 pointer-events-none">
                     <button onclick="event.stopPropagation(); seek(-10)" class="text-white/90 p-4 p-btn active:scale-90"><i class="fas fa-backward text-3xl"></i></button>
                     <div id="buffering" class="hidden animate-spin rounded-full h-12 w-12 border-4 border-red-600 border-t-transparent absolute"></div>
@@ -189,6 +193,7 @@
                     </button>
                     <button onclick="event.stopPropagation(); seek(10)" class="text-white/90 p-4 p-btn active:scale-90"><i class="fas fa-forward text-3xl"></i></button>
                 </div>
+
                 <div class="bg-gradient-to-t from-black/90 to-transparent p-4 pt-16 p-btn">
                     <div class="flex justify-between text-xs text-gray-200 mb-2 font-mono font-bold">
                         <span id="curT">0:00</span>
@@ -198,7 +203,7 @@
                     <div class="flex justify-between items-center mt-3">
                         <div class="flex items-center gap-4">
                             <button onclick="event.stopPropagation(); playPause()" id="playBtm"><i class="fas fa-pause text-white text-2xl"></i></button>
-                            <span class="text-red-500 font-bold text-[10px] border border-red-500 px-1 rounded uppercase">Live</span>
+                            <span class="text-red-500 font-bold text-[10px] border border-red-500 px-1 rounded uppercase tracking-widest">Live</span>
                         </div>
                         <button onclick="event.stopPropagation(); fullScreen()"><i class="fas fa-expand text-white text-xl"></i></button>
                     </div>
@@ -207,7 +212,7 @@
 
             <!-- Mini UI -->
             <div id="miniControlBar" class="hidden">
-                <button onclick="expand()" class="absolute inset-0"></button>
+                <button onclick="expand()" class="absolute inset-0 z-0"></button>
                 <div class="flex-1 px-3"><p id="miniTx" class="text-sm font-bold text-white truncate"></p></div>
                 <button onclick="event.stopPropagation(); closeP()" class="z-10 text-white p-2 mr-1"><i class="fas fa-times text-xs"></i></button>
             </div>
@@ -229,8 +234,8 @@
             </div>
             
             <div class="p-4">
-                <!-- 4. NATIVE AD CONTAINER -->
-                <div id="nativeAdContainer" class="mb-6 min-h-[100px]"></div>
+                <!-- Native Ad Location -->
+                <div id="nativeAdContainer" class="mb-6 min-h-[50px]"></div>
 
                 <h3 class="font-bold text-xs uppercase tracking-widest text-gray-500 mb-4 border-l-4 border-red-600 pl-3">Up Next</h3>
                 <div id="upNextGrid" class="grid grid-cols-1 gap-4"></div>
@@ -249,17 +254,12 @@
     </div>
 
     <script>
-        // SHEET URL (Worker will process this)
-        const CSV_LINK = "aHR0cHM6Ly9kb2NzLmdvb2dsZS5jb20vc3ByZWFkc2hlZXRzL2QvZS8yUEFDWC0xdlR1Z09RWHdMSUd5Vm9mRmx2RkxLTjdFX1BOZW1Da0lEY2R3QjRkR2NvUDE2Z09uVGNtSjJpU001bHJfWUZWUHRzMUZiYzVnNWdrdkU0Uy9wdWI/b3V0cHV0PWNzdg==";
-        // WORKER PROXY (Only for Sheet Data)
-        const WORKER = "https://netbongo.aiorbd.workers.dev/?url=";
-
-        let list=[], folders=[], feed=[], ptr=0, hls=null, timer;
+        const API = "aHR0cHM6Ly9kb2NzLmdvb2dsZS5jb20vc3ByZWFkc2hlZXRzL2QvZS8yUEFDWC0xdlR1Z09RWHdMSUd5Vm9mRmx2RkxLTjdFX1BOZW1Da0lEY2R3QjRkR2NvUDE2Z09uVGNtSjJpU001bHJfWUZWUHRzMUZiYzVnNWdrdkU0Uy9wdWI/b3V0cHV0PWNzdg==";
+        let allVids=[], folders=[], feed=[], ptr=0, hls=null, timer;
         let favs = JSON.parse(localStorage.getItem('nb_v9_favs')) || [];
         let curV = null, isMini=false, isOpen=false;
 
         async function init() {
-            // BACK BUTTON
             window.history.pushState({p:'h'}, "", "");
             window.onpopstate = () => {
                 if(document.getElementById('searchBox').style.display === 'flex') { toggleSearch(); window.history.pushState({p:'h'}, "", ""); }
@@ -268,9 +268,8 @@
             };
 
             try {
-                // Fetch Sheet Data via Worker
-                const finalUrl = WORKER + encodeURIComponent(atob(CSV_LINK));
-                const r = await fetch(finalUrl);
+                // Using Worker
+                const r = await fetch(WORKER_URL + encodeURIComponent(atob(API)));
                 const t = await r.text();
                 const raw = t.split('\n').slice(1).map(r=>{
                     const c=r.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(s=>s.replace(/^"|"$/g,'').trim());
@@ -280,10 +279,10 @@
                 }).filter(x=>x.u);
                 
                 folders = raw.filter(x => x.u.includes('.m3u') && !x.u.includes('.m3u8') || x.type==='playlist');
-                list = raw.filter(x => !folders.includes(x)).sort(()=>0.5-Math.random());
+                allVids = raw.filter(x => !folders.includes(x)).sort(()=>0.5-Math.random());
                 
                 renderChips();
-                feed = list;
+                feed = allVids;
                 renderFeed(true);
             } catch(e) { console.log(e); }
         }
@@ -305,7 +304,7 @@
                 if((ptr+i)>0 && (ptr+i)%5===0) {
                     const adDiv = document.createElement('div');
                     adDiv.className = 'col-span-full';
-                    adDiv.innerHTML = getFeedAd(); // Helper function
+                    adDiv.innerHTML = getBannerAd();
                     g.appendChild(adDiv);
                 }
                 g.appendChild(makeCard(v));
@@ -319,8 +318,8 @@
             d.className = 'mb-6 cursor-pointer group active:opacity-60 transition';
             d.onclick = () => playVideo(v);
             
-            // Image via Worker to avoid CORS
-            const imgUrl = v.i.includes('http') ? (WORKER + encodeURIComponent(v.i)) : 'https://via.placeholder.com/300x180';
+            // Image via Proxy
+            const imgUrl = v.i.includes('http') ? (WORKER_URL + encodeURIComponent(v.i)) : 'https://via.placeholder.com/300x180';
 
             d.innerHTML = `
                 <div class="aspect-video bg-[#111] w-full relative rounded-xl overflow-hidden shadow-lg border border-[#222]">
@@ -335,10 +334,9 @@
                     </div>
                 </div>
             `;
-            // Metadata Probe (Using Worker for duration check)
             if(v.d==='0:00') {
                 const t = document.createElement('video'); 
-                t.src = WORKER + encodeURIComponent(v.u); 
+                t.src = WORKER_URL + encodeURIComponent(v.u); 
                 t.preload='metadata';
                 t.onloadedmetadata = () => {
                     v.d = isFinite(t.duration) ? fmt(t.duration) : 'LIVE';
@@ -350,15 +348,13 @@
         }
 
         function loadMoreVideos() { renderFeed(false); }
-        function resetApp() { document.querySelectorAll('.chip').forEach(c=>c.className='chip'); document.querySelector('.chip').className='chip active'; feed=list; renderFeed(true); if(isOpen) minimize(); }
+        function resetApp() { document.querySelectorAll('.chip').forEach(c=>c.className='chip'); document.querySelector('.chip').className='chip active'; feed=allVids; renderFeed(true); if(isOpen) minimize(); }
 
         async function loadPl(u) {
             document.getElementById('videoContainer').innerHTML='<div class="col-span-full py-40 text-center"><i class="fas fa-spinner fa-spin text-3xl text-red-600"></i></div>';
             document.getElementById('loadMoreDiv').classList.add('hidden');
             try {
-                // Playlist via Worker
-                const r = await fetch(WORKER + encodeURIComponent(u)); 
-                const t = await r.text();
+                const r = await fetch(WORKER_URL + encodeURIComponent(u)); const t = await r.text();
                 const l=[]; let tmp={};
                 t.split('\n').forEach(line=>{
                     if(line.startsWith('#EXTINF')) tmp={t:line.split(',').pop().trim(), i:line.match(/tvg-logo="([^"]*)"/)?.[1]};
@@ -386,15 +382,16 @@
             // INJECT NATIVE AD IN PLAYER
             injectNativeAd();
 
-            // VIDEO PLAYBACK: DIRECT URL (NO WORKER)
+            // Video Load
+            const src = v.u;
             if(Hls.isSupported() && (v.u.includes('.m3u8') || v.type==='m3u8')) {
                 if(hls) hls.destroy(); hls = new Hls();
-                hls.loadSource(v.u); hls.attachMedia(vid);
+                hls.loadSource(src); hls.attachMedia(vid);
                 hls.on(Hls.Events.MANIFEST_PARSED, ()=>vid.play());
                 hls.on(Hls.Events.LEVEL_LOADED, (e,d) => setupQ(hls.levels));
             } else {
                 if(hls) { hls.destroy(); hls=null; }
-                setupQ([]); vid.src=v.u; vid.play();
+                setupQ([]); vid.src=src; vid.play();
             }
             
             const n = document.getElementById('upNextGrid');
@@ -438,7 +435,7 @@
             }
         }
 
-        function fullScreen() { if(!document.fullscreenElement) document.getElementById('videoHolder').requestFullscreen(); else document.exitFullscreen(); }
+        function fullScreen() { if(!document.fullscreenElement) document.getElementById('vidWrapper').requestFullscreen(); else document.exitFullscreen(); }
         
         vid.addEventListener('timeupdate', () => {
             const p = (vid.currentTime/vid.duration)*100;
@@ -470,7 +467,7 @@
         }
 
         const fmt = s => { if(!s || !isFinite(s)) return "0:00"; const m=Math.floor(s/60), sc=Math.floor(s%60); return m+":"+(sc<10?"0"+sc:sc); };
-        const fixImg = u => { if(!u) return 'https://via.placeholder.com/300x180?text=No+Preview'; if(u.includes('drive')) return (WORKER + encodeURIComponent(u)); return u; };
+        const fixImg = u => { if(!u) return 'https://via.placeholder.com/300x180?text=No+Preview'; if(u.includes('drive')) return (WORKER_URL + encodeURIComponent(u)); return u; };
         
         vid.addEventListener('waiting', ()=>document.getElementById('buffering').classList.remove('hidden'));
         vid.addEventListener('playing', ()=>document.getElementById('buffering').classList.add('hidden'));
@@ -478,7 +475,7 @@
         function fav() {
             const idx = favs.findIndex(f=>f.u===curV.u);
             if(idx>-1) favs.splice(idx,1); else favs.push(curV);
-            localStorage.setItem('nb_v9_favs', JSON.stringify(favs));
+            localStorage.setItem('nb_pro_favs', JSON.stringify(favs));
             upFav();
         }
         function upFav() {
