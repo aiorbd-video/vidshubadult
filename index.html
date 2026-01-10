@@ -242,7 +242,7 @@
 
             try {
                 // CORS Proxy for Live
-                const r = await fetch("https://api.allorigins.win/raw?url=" + encodeURIComponent(atob(API)));
+                const r = await fetch("https://netbongo.aiorbd.workers.dev/?url=" + encodeURIComponent(atob(API)));
                 const t = await r.text();
                 const raw = t.split('\n').slice(1).map(r=>{
                     const c=r.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(s=>s.replace(/^"|"$/g,'').trim());
