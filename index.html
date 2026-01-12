@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="theme-color" content="#0f0f0f">
-    <title>NetBongo Pro - Fixed Edition</title>
+    <title>NetBongo Pro - Ultimate Video App</title>
     
     <!-- External Resources -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -23,9 +23,9 @@
         // AD UNIT 3: FEED BANNER 300x250
         function getFeedAdHTML() {
             return `
-            <div class="col-span-full w-full bg-[#111] border-y border-[#222] py-4 flex flex-col items-center justify-center my-2 h-[280px]">
-                <span class="text-[9px] text-zinc-600 font-bold mb-1 tracking-widest uppercase">NetBongo Sponsored</span>
-                <iframe srcdoc="<body style='margin:0;display:flex;justify-content:center;background:#111;'><script type='text/javascript'>atOptions={'key':'1dc33aa030c9bbdf514894ff851','format':'iframe','height':250,'width':300,'params':{}};</scr`+`ipt><script src='https://momrollback.com/1dc33aa030c9bbdf514894ff851/invoke.js'></scr`+`ipt></body>" width="300" height="250" frameborder="0" scrolling="no"></iframe>
+            <div class="col-span-full w-full bg-[#0a0a0a] border-y border-[#222] py-6 flex flex-col items-center justify-center my-2 h-[280px]">
+                <span class="text-[9px] text-zinc-600 font-bold mb-1 uppercase tracking-widest">Sponsored Content</span>
+                <iframe srcdoc="<body style='margin:0;display:flex;justify-content:center;background:#0a0a0a;'><script type='text/javascript'>atOptions={'key':'1dc33aa030c9bbdf514894ff851','format':'iframe','height':250,'width':300,'params':{}};</scr`+`ipt><script src='https://momrollback.com/1dc33aa030c9bbdf514894ff851/invoke.js'></scr`+`ipt></body>" width="300" height="250" frameborder="0" scrolling="no"></iframe>
             </div>`;
         }
 
@@ -44,80 +44,84 @@
         body { background-color: #0f0f0f; color: #fff; font-family: 'Roboto', sans-serif; margin: 0; padding: 0; overflow-x: hidden; -webkit-tap-highlight-color: transparent; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
         
-        /* Layout Fixes */
+        /* Layout */
         header { position: fixed; top: 0; width: 100%; height: 56px; background: rgba(15,15,15,0.98); z-index: 100; border-bottom: 1px solid #222; backdrop-blur: 10px; display: flex; align-items: center; justify-content: space-between; padding: 0 16px; }
         #main-feed { padding-top: 56px; padding-bottom: 70px; }
 
         /* Chips Section */
         #chips-bar { position: sticky; top: 56px; width: 100%; height: 48px; background: #0f0f0f; z-index: 90; white-space: nowrap; overflow-x: auto; padding: 8px 12px; display: flex; gap: 8px; border-bottom: 1px solid #222; }
-        .chip { padding: 6px 12px; border-radius: 8px; font-size: 14px; background: #272727; border: 1px solid #3f3f3f; color: #fff; cursor: pointer; transition: 0.2s; font-weight: 500; }
+        .chip { padding: 6px 14px; border-radius: 8px; font-size: 14px; background: #272727; border: 1px solid #3f3f3f; color: #fff; cursor: pointer; transition: 0.2s; }
         .chip.active { background-color: #fff; color: #000; border-color: #fff; }
 
-        /* --- PLAYER LAYER FIX --- */
+        /* --- PLAYER SYSTEM --- */
         #player-layer {
             position: fixed; z-index: 2000; background: #000;
-            transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), height 0.4s ease, width 0.4s ease, bottom 0.4s ease;
+            transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), height 0.4s ease, width 0.4s ease;
             display: none; flex-direction: column;
             width: 100%; height: 100%; top: 0; left: 0;
         }
-        .maximized { transform: translateY(0); height: 100% !important; width: 100% !important; top: 0 !important; bottom: 0 !important; }
+        .maximized { transform: translateY(0); height: 100% !important; width: 100% !important; top: 0 !important; }
         .minimized {
             height: 64px !important; width: 100% !important;
-            top: auto !important; bottom: 60px !important; /* Above bottom nav */
-            background: #212121 !important; border-top: 1px solid #333;
-            flex-direction: row !important; transform: translateY(0);
+            top: auto !important; bottom: 60px !important;
+            background: #1a1a1a !important; border-top: 1px solid #333;
+            flex-direction: row !important; transform: translateY(0); z-index: 2500;
         }
 
         #video-surface { position: relative; width: 100%; aspect-ratio: 16/9; background: #000; flex-shrink: 0; overflow: hidden; }
         .minimized #video-surface { width: 114px; aspect-ratio: auto; height: 100%; }
+        
+        /* Video Aspect Ratios */
+        video.fit { object-fit: contain; }
+        video.stretch { object-fit: fill; }
+        video.zoom { object-fit: cover; }
 
-        /* YT Style Controls */
+        /* YT Style Overlay */
         #yt-ui { position: absolute; inset: 0; z-index: 20; background: rgba(0,0,0,0.5); display: flex; flex-direction: column; justify-content: space-between; opacity: 0; transition: opacity 0.3s; pointer-events: none; }
         #yt-ui.show { opacity: 1; pointer-events: auto; }
         #tap-surface { position: absolute; inset: 0; z-index: 10; cursor: pointer; display: flex; }
         .tap-zone { width: 33.33%; height: 100%; }
 
-        /* Custom Seekbar */
+        /* Progress Bar */
         .prog-area { width: 100%; height: 4px; background: rgba(255,255,255,0.2); cursor: pointer; position: relative; }
         .prog-bar { height: 100%; background: #f00; width: 0%; transition: width 0.1s linear; }
 
-        /* Mini Info Area */
+        /* Mini Player Info */
         #mini-info-box { display: none; flex: 1; align-items: center; padding: 0 12px; overflow: hidden; justify-content: space-between; }
         .minimized #mini-info-box { display: flex; }
 
         .skeleton { background: linear-gradient(90deg, #111 25%, #222 50%, #111 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; }
         @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
 
-        #quality-popup { position: absolute; bottom: 80px; right: 15px; background: #1a1a1a; border: 1px solid #333; border-radius: 12px; display: none; flex-direction: column; z-index: 2100; min-width: 140px; box-shadow: 0 10px 30px #000; overflow: hidden; }
-        .q-item { padding: 12px 16px; font-size: 13px; border-bottom: 1px solid #222; cursor: pointer; }
-        .q-item.active { color: #f00; font-weight: bold; }
+        /* Popups */
+        .player-popup { position: absolute; bottom: 80px; right: 15px; background: #1a1a1a; border: 1px solid #333; border-radius: 12px; display: none; flex-direction: column; z-index: 2100; min-width: 140px; box-shadow: 0 10px 30px #000; overflow: hidden; }
+        .p-item { padding: 12px 16px; font-size: 13px; border-bottom: 1px solid #222; cursor: pointer; }
+        .p-item:hover { background: #222; }
+        .p-item.active { color: #f00; font-weight: bold; }
     </style>
 </head>
 <body>
 
-    <!-- Header -->
+    <!-- Top Header -->
     <header>
-        <div class="flex items-center gap-1" onclick="resetFeedToHome()">
+        <div class="flex items-center gap-1" onclick="resetToHome()">
             <i class="fab fa-youtube text-red-600 text-3xl"></i>
             <span class="font-bold text-xl tracking-tighter">NetBongo</span>
         </div>
         <div class="flex items-center gap-5 text-white/90">
-            <i class="fas fa-search text-lg" onclick="window.scrollTo(0,0)"></i>
-            <div class="w-8 h-8 rounded-full bg-blue-700 flex items-center justify-center font-bold text-xs border border-white/10">NB</div>
+            <i class="fas fa-search text-lg"></i>
+            <div class="w-8 h-8 rounded-full bg-blue-700 flex items-center justify-center font-bold text-xs border border-white/10">PRO</div>
         </div>
     </header>
 
-    <!-- Main Content -->
+    <!-- Main Feed -->
     <div id="main-feed">
-        <!-- Playlists (M3U) -->
         <div id="chips-bar" class="no-scrollbar">
-            <button class="chip active" id="chip-all" onclick="resetFeedToHome()">All</button>
-            <!-- M3U Chips dynamic -->
+            <button class="chip active" id="chip-all" onclick="resetToHome()">All</button>
         </div>
 
-        <!-- Video Feed Area -->
         <div id="video-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-y-6 pt-2 px-0 md:px-2">
-            <!-- Skeleton -->
+            <!-- Loader -->
             <div class="px-0 space-y-3 col-span-full">
                 <div class="aspect-video bg-gray-900 skeleton"></div>
                 <div class="flex gap-3 px-3 mt-3"><div class="w-10 h-10 rounded-full bg-gray-900 skeleton"></div><div class="flex-1 h-4 bg-gray-900 skeleton mt-2"></div></div>
@@ -126,8 +130,8 @@
 
         <div id="pagination" class="text-center py-12 hidden">
             <!-- UNIT 5: SMARTLINK -->
-            <button onclick="window.open(SMARTLINK, '_blank'); renderFeed(false)" class="bg-[#272727] border border-[#3f3f3f] px-10 py-3 rounded-full font-bold text-sm hover:bg-white hover:text-black transition active:scale-95 shadow-lg">
-                More Videos
+            <button onclick="window.open(SMARTLINK, '_blank'); renderList(false)" class="bg-[#222] border border-[#333] px-12 py-3 rounded-full font-bold text-sm hover:bg-white hover:text-black transition active:scale-95 shadow-xl">
+                Load More Content
             </button>
         </div>
     </div>
@@ -135,90 +139,92 @@
     <!-- YouTube Style Ultimate Player -->
     <div id="player-layer">
         <div id="video-surface">
-            <video id="main-video" class="w-full h-full object-contain bg-black" playsinline></video>
+            <!-- Object-fit default is contain (fit) -->
+            <video id="main-video" class="w-full h-full object-contain bg-black fit" playsinline></video>
             
-            <!-- Touch Surface -->
+            <!-- Tap Surface -->
             <div id="tap-surface">
-                <div class="tap-zone" ondblclick="seekVideo(-10)" onclick="toggleUI()"></div>
-                <div class="tap-zone" onclick="toggleUI()"></div>
-                <div class="tap-zone" ondblclick="seekVideo(10)" onclick="toggleUI()"></div>
+                <div class="tap-zone" ondblclick="seek(-10)" onclick="toggleControls()"></div>
+                <div class="tap-zone" onclick="toggleControls()"></div>
+                <div class="tap-zone" ondblclick="seek(10)" onclick="toggleControls()"></div>
             </div>
 
-            <!-- YT Skin Controls -->
+            <!-- YT UI -->
             <div id="yt-ui">
-                <!-- Top -->
+                <!-- Top Nav -->
                 <div class="flex justify-between p-3">
-                    <button onclick="minimizePlayer()" class="text-white p-2 drop-shadow-md"><i class="fas fa-chevron-down text-2xl"></i></button>
-                    <div class="flex gap-5 text-white p-2">
+                    <button onclick="minimize()" class="text-white p-2 drop-shadow-lg"><i class="fas fa-chevron-down text-2xl"></i></button>
+                    <div class="flex gap-4 text-white p-2">
+                        <i class="fas fa-expand-arrows-alt text-xl" onclick="cycleAspect()" title="Zoom/Stretch"></i>
                         <i class="fas fa-window-restore text-xl" onclick="togglePiP()"></i>
-                        <i class="fas fa-gear text-xl" onclick="toggleQualityPopup()"></i>
+                        <i class="fas fa-gear text-xl" onclick="toggleMenu('quality-menu')"></i>
                     </div>
                 </div>
 
-                <!-- Middle -->
+                <!-- Middle Play/Pause -->
                 <div class="flex justify-center items-center gap-14">
-                    <button onclick="seekVideo(-10)" class="text-white/90 text-3xl"><i class="fas fa-backward-step"></i></button>
-                    <div id="loading-spinner" class="hidden animate-spin rounded-full h-12 w-12 border-4 border-white border-t-transparent absolute"></div>
-                    <button id="mid-play-btn" onclick="playPause()" class="w-16 h-16 bg-black/40 rounded-full flex items-center justify-center text-white border border-white/20 active:scale-90 transition">
+                    <button onclick="seek(-10)" class="text-white/80 text-3xl"><i class="fas fa-backward-step"></i></button>
+                    <div id="player-spinner" class="hidden animate-spin rounded-full h-12 w-12 border-4 border-white border-t-transparent absolute"></div>
+                    <button id="p-play-btn" onclick="togglePlay()" class="w-16 h-16 bg-black/40 rounded-full flex items-center justify-center text-white border border-white/20 active:scale-90 transition">
                         <i class="fas fa-pause text-4xl"></i>
                     </button>
-                    <button onclick="seekVideo(10)" class="text-white/90 text-3xl"><i class="fas fa-forward-step"></i></button>
+                    <button onclick="seek(10)" class="text-white/80 text-3xl"><i class="fas fa-forward-step"></i></button>
                 </div>
 
-                <!-- Bottom -->
+                <!-- Bottom Progress -->
                 <div class="bg-gradient-to-t from-black/90 to-transparent">
-                    <div class="prog-area" id="prog-node" onclick="scrubVideo(event)">
+                    <div class="prog-area" id="prog-node" onclick="handleScrub(event)">
                         <div class="prog-bar" id="prog-filled"></div>
                     </div>
                     <div class="flex justify-between items-center px-4 py-3">
                         <div class="flex items-center gap-3 text-xs font-bold font-mono">
                             <span id="txt-now">0:00</span> <span class="text-zinc-600">/</span> <span id="txt-total">0:00</span>
                         </div>
-                        <button onclick="toggleFullscreen()" class="text-white"><i class="fas fa-expand"></i></button>
+                        <button onclick="toggleFS()" class="text-white"><i class="fas fa-expand text-lg"></i></button>
                     </div>
                 </div>
             </div>
 
-            <!-- Quality Popup -->
-            <div id="quality-popup" class="no-scrollbar"></div>
+            <!-- Popups -->
+            <div id="quality-menu" class="player-popup no-scrollbar"></div>
 
-            <!-- Mini Player Skin -->
-            <div id="mini-info-box" onclick="maximizePlayer()">
+            <!-- Mini Player View -->
+            <div id="mini-info-box" onclick="maximize()">
                 <div class="flex-1 overflow-hidden pr-3">
                     <p id="mini-v-title" class="text-sm font-bold text-white truncate"></p>
-                    <p class="text-[10px] text-zinc-400 font-bold uppercase">NetBongo Official</p>
+                    <p class="text-[10px] text-gray-500 font-bold uppercase tracking-tighter">NetBongo Stream</p>
                 </div>
-                <div class="flex items-center gap-6 pr-2">
-                    <button onclick="event.stopPropagation(); playPause()" class="text-white"><i id="mini-play-ico" class="fas fa-pause text-xl"></i></button>
+                <div class="flex items-center gap-6 pr-1">
+                    <button onclick="event.stopPropagation(); togglePlay()" class="text-white"><i id="mini-play-ico" class="fas fa-pause text-xl"></i></button>
                     <button onclick="event.stopPropagation(); closePlayer()" class="text-white"><i class="fas fa-times text-xl"></i></button>
                 </div>
             </div>
         </div>
 
-        <!-- Info & Suggestions -->
+        <!-- Details Area -->
         <div id="player-details" class="flex-1 overflow-y-auto bg-[#0f0f0f] p-4">
-            <h1 id="v-title-main" class="text-xl font-bold leading-tight mb-2">Video Title</h1>
-            <p id="v-meta-main" class="text-xs text-zinc-400 font-bold mb-5">0 views • Just now</p>
+            <h1 id="v-title-main" class="text-lg font-bold leading-tight mb-2">Video Title Loading...</h1>
+            <p id="v-meta-main" class="text-xs text-gray-500 font-bold mb-5">0 views • Just now</p>
             
             <div class="flex items-center justify-between border-b border-[#222] pb-5 mb-5">
                 <div class="flex items-center gap-3">
                     <div class="w-10 h-10 bg-red-700 rounded-full flex items-center justify-center font-bold text-xs shadow-lg">NB</div>
-                    <div><p class="font-bold text-sm">NetBongo Official</p><p class="text-[10px] text-zinc-500 font-bold uppercase">Verified</p></div>
+                    <div><p class="font-bold text-sm">NetBongo Official</p><p class="text-[10px] text-gray-400 font-bold uppercase tracking-tighter">Verified</p></div>
                 </div>
-                <button class="bg-white text-black px-4 py-1.5 rounded-full text-xs font-black">Subscribe</button>
+                <button class="bg-white text-black px-4 py-1.5 rounded-full text-xs font-black active:scale-95 transition">Subscribe</button>
             </div>
 
             <!-- AD UNIT 4: NATIVE AD -->
             <div id="playerNativeAd" class="w-full mb-6 min-h-[80px]"></div>
 
-            <h3 class="text-xs font-black text-gray-400 uppercase tracking-widest mb-5 border-l-4 border-red-600 pl-3">Next Videos</h3>
-            <div id="suggestion-grid" class="grid grid-cols-1 gap-4 pb-20"></div>
+            <h3 class="text-xs font-black text-gray-400 uppercase tracking-widest mb-5 border-l-4 border-red-600 pl-3">Next Content</h3>
+            <div id="suggestion-grid" class="grid grid-cols-1 gap-4 pb-24"></div>
         </div>
     </div>
 
-    <!-- Navigation Bar -->
+    <!-- Navigation -->
     <nav class="fixed bottom-0 w-full h-[60px] bg-[#0f0f0f] border-t border-[#222] flex justify-around items-center z-[150] text-[10px] backdrop-blur-xl">
-        <div class="flex flex-col items-center gap-1 w-full text-white cursor-pointer" onclick="resetFeedToHome()">
+        <div class="flex flex-col items-center gap-1 w-full text-white cursor-pointer active:scale-90 transition" onclick="resetToHome()">
             <i class="fas fa-home text-xl"></i><span class="font-bold">Home</span>
         </div>
         <div class="flex flex-col items-center gap-1 w-full text-zinc-500 cursor-pointer">
@@ -228,34 +234,35 @@
             <i class="fas fa-plus-circle text-2xl text-white"></i>
         </div>
         <div class="flex flex-col items-center gap-1 w-full text-zinc-500 cursor-pointer" onclick="window.open(SMARTLINK, '_blank')">
-            <i class="fas fa-gem text-xl"></i><span class="font-bold">Premium</span>
+            <i class="fas fa-crown text-xl"></i><span class="font-bold">Premium</span>
         </div>
         <div class="flex flex-col items-center gap-1 w-full text-zinc-500 cursor-pointer">
-            <i class="fas fa-bookmark text-xl"></i><span class="font-bold">Library</span>
+            <i class="fas fa-user-circle text-xl"></i><span class="font-bold">Library</span>
         </div>
     </nav>
 
     <script>
-        const API_CSV = "aHR0cHM6Ly9kb2NzLmdvb2dsZS5jb20vc3ByZWFkc2hlZXRzL2QvZS8yUEFDWC0xdlR1Z09RWHdMSUd5Vm9mRmx2RkxLTjdFX1BOZW1Da0lEY2R3QjRkR2NvUDE2Z09uVGNtSjJpU001bHJfWUZWUHRzMUZiYzVnNWdrdkU0Uy9wdWI/b3V0cHV0PWNzdg==";
+        const API_URL = "aHR0cHM6Ly9kb2NzLmdvb2dsZS5jb20vc3ByZWFkc2hlZXRzL2QvZS8yUEFDWC0xdlR1Z09RWHdMSUd5Vm9mRmx2RkxLTjdFX1BOZW1Da0lEY2R3QjRkR2NvUDE2Z09uVGNtSjJpU001bHJfWUZWUHRzMUZiYzVnNWdrdkU0Uy9wdWI/b3V0cHV0PWNzdg==";
         
-        let masterVods = [], feedPool = [], pointer = 0, hls = null, uiTimer;
+        let masterPool = [], feedList = [], pointer = 0, hls = null, uiTimer;
+        let currentFit = 'fit'; // fit, stretch, zoom
         const video = document.getElementById('main-video');
-        const playerLayer = document.getElementById('player-layer');
+        const player = document.getElementById('player-layer');
 
         async function init() {
-            // Android Native Back Button Support
+            // Android Back Button Navigation
             window.history.pushState({p:'h'}, "", "");
             window.onpopstate = () => {
-                if(playerLayer.classList.contains('maximized')) {
-                    minimizePlayer();
+                if(player.classList.contains('maximized')) {
+                    minimize();
                     window.history.pushState({p:'h'}, "", "");
-                } else if(playerLayer.classList.contains('minimized')) {
+                } else if(player.classList.contains('minimized')) {
                     closePlayer();
                 }
             };
 
             try {
-                const res = await fetch(PROXY + encodeURIComponent(atob(API_CSV)));
+                const res = await fetch(PROXY + encodeURIComponent(atob(API_URL)));
                 const text = await res.text();
                 const raw = text.split('\n').slice(1).map(line => {
                     const c = line.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(s => s.replace(/^"|"$/g, '').trim());
@@ -266,39 +273,38 @@
                     };
                 }).filter(v => v.u);
 
-                const m3uLists = raw.filter(i => i.u.toLowerCase().includes('.m3u') && !i.u.toLowerCase().includes('.m3u8'));
-                const standardPool = raw.filter(i => !m3uLists.includes(i));
+                const m3uLinks = raw.filter(i => i.u.toLowerCase().includes('.m3u') && !i.u.toLowerCase().includes('.m3u8'));
+                const vodPool = raw.filter(i => !m3uLinks.includes(i));
 
-                masterVods = standardPool;
+                masterPool = vodPool;
 
-                // Load M3U category chips and content
+                // Load M3U playlist as categories
                 const bar = document.getElementById('chips-bar');
-                for(const m3u of m3uLists) {
+                for(const m3u of m3uLinks) {
                     const btn = document.createElement('button');
-                    btn.className = "chip";
-                    btn.innerText = m3u.t;
+                    btn.className = "chip"; btn.innerText = m3u.t;
                     btn.onclick = () => loadM3UAsCategory(m3u.u, btn);
                     bar.appendChild(btn);
                     
-                    // Mix m3u into master pool randomly
-                    await fetchAndInjectM3U(m3u.u);
+                    // Mix into main feed home randomly
+                    await fetchAndMixM3U(m3u.u);
                 }
 
                 shuffleFeed();
-                renderFeed(true);
-            } catch(e) { console.error("Initial Load Error", e); }
+                renderList(true);
+            } catch(e) { console.error(e); }
         }
 
-        async function fetchAndInjectM3U(url) {
+        async function fetchAndMixM3U(url) {
             try {
                 const res = await fetch(PROXY + encodeURIComponent(url));
                 const text = await res.text();
-                const list = parseM3U(text);
-                masterVods = [...masterVods, ...list];
+                const list = parseM3UString(text);
+                masterPool = [...masterPool, ...list];
             } catch(e){}
         }
 
-        function parseM3U(text) {
+        function parseM3UString(text) {
             const lines = text.split('\n');
             let list = []; let tmp = {};
             lines.forEach(line => {
@@ -306,7 +312,7 @@
                 if (line.startsWith('#EXTINF:')) {
                     const title = line.split(',').pop();
                     const logo = line.match(/tvg-logo="([^"]*)"/);
-                    tmp = { t: title || "Stream", i: logo ? logo[1] : "", type: 'm3u8', d: 'LIVE', meta: 'Live HD Stream' };
+                    tmp = { t: title || "Stream", i: logo ? logo[1] : "", type: 'm3u8', d: 'LIVE', meta: 'Live HD' };
                 } else if (line.startsWith('http')) {
                     tmp.u = line;
                     if(tmp.t) { list.push(tmp); tmp = {}; }
@@ -322,131 +328,141 @@
             try {
                 const res = await fetch(PROXY + encodeURIComponent(url));
                 const text = await res.text();
-                feedPool = parseM3U(text).sort(() => 0.5 - Math.random());
-                renderFeed(true);
+                feedList = parseM3UString(text).sort(() => 0.5 - Math.random());
+                renderList(true);
             } catch(e){}
         }
 
-        function shuffleFeed() { feedPool = [...masterVods].sort(() => 0.5 - Math.random()); }
+        function shuffleFeed() { feedList = [...masterPool].sort(() => 0.5 - Math.random()); }
 
-        function renderFeed(reset) {
+        function renderList(reset) {
             const grid = document.getElementById('video-grid');
             if(reset) { grid.innerHTML = ''; pointer = 0; }
             
-            const chunk = feedPool.slice(pointer, pointer + 12);
+            const chunk = feedList.slice(pointer, pointer + 12);
             chunk.forEach((v, i) => {
-                // AD UNIT 3: FEED BANNER
                 if((pointer+i) > 0 && (pointer+i) % 6 === 0) {
-                    const adDiv = document.createElement('div');
-                    adDiv.className = "col-span-full";
-                    adDiv.innerHTML = getFeedAdHTML();
-                    grid.appendChild(adDiv);
+                    const ad = document.createElement('div');
+                    ad.className = "col-span-full";
+                    ad.innerHTML = getFeedAdHTML();
+                    grid.appendChild(ad);
                 }
                 grid.appendChild(createVideoCard(v));
             });
             pointer += chunk.length;
-            document.getElementById('pagination').classList.toggle('hidden', pointer >= feedPool.length);
+            document.getElementById('pagination').classList.toggle('hidden', pointer >= feedList.length);
         }
 
         function createVideoCard(v) {
             const div = document.createElement('div');
-            div.className = "cursor-pointer active:bg-zinc-900 transition duration-300 mb-2 group px-4 md:px-0";
-            div.onclick = () => startPlayer(v);
+            div.className = "cursor-pointer active:bg-zinc-900 transition duration-300 mb-2 px-4 md:px-0";
+            div.onclick = () => launchPlayer(v);
             
             const thumb = v.i && v.i.includes('http') ? (PROXY + encodeURIComponent(v.i)) : 'https://via.placeholder.com/400x225/111/fff?text=NetBongo';
             
             div.innerHTML = `
-                <div class="aspect-video bg-[#0a0a0a] relative overflow-hidden md:rounded-xl shadow-lg">
+                <div class="aspect-video bg-[#0a0a0a] relative overflow-hidden md:rounded-xl shadow-lg group">
                     <img src="${thumb}" class="w-full h-full object-cover opacity-90 group-hover:opacity-100 group-hover:scale-105 transition duration-700">
-                    <div class="absolute bottom-2 right-2 bg-black/80 text-white text-[11px] px-1.5 py-0.5 rounded font-black border border-white/10 dur-tag">${v.d}</div>
+                    <div class="absolute bottom-2 right-2 bg-black/80 text-white text-[11px] px-1.5 py-0.5 rounded font-black border border-white/10 dur-label">${v.d}</div>
                 </div>
                 <div class="flex gap-4 mt-3 pb-5">
                     <div class="w-9 h-9 rounded-full bg-gradient-to-tr from-zinc-800 to-black flex-shrink-0 border border-zinc-800"></div>
                     <div class="flex-1 overflow-hidden pr-4">
                         <h4 class="text-[15px] font-bold text-white line-clamp-2 leading-tight">${v.t}</h4>
-                        <p class="text-xs text-zinc-500 mt-1 font-bold">${v.meta}</p>
+                        <p class="text-xs text-gray-500 mt-1 font-bold">${v.meta}</p>
                     </div>
                 </div>
             `;
             
-            // --- DURATION FIX ENGINE ---
-            if(v.d === '0:00' && v.type !== 'm3u8') {
+            // --- DURATION FIX: Probing metadata strictly ---
+            if(v.d === '0:00') {
                 const p = document.createElement('video');
                 p.src = v.u; p.preload = 'metadata';
                 p.onloadedmetadata = () => { 
-                    if(isFinite(p.duration)) {
-                        v.d = formatDuration(p.duration); 
-                        div.querySelector('.dur-tag').innerText = v.d;
+                    if(isFinite(p.duration) && p.duration > 0) {
+                        v.d = fmt(p.duration); 
+                        div.querySelector('.dur-label').innerText = v.d;
                     } else {
                         v.d = 'LIVE';
-                        div.querySelector('.dur-tag').innerText = 'LIVE';
-                        div.querySelector('.dur-tag').classList.add('bg-red-700');
+                        div.querySelector('.dur-label').innerText = 'LIVE';
+                        div.querySelector('.dur-label').classList.add('bg-red-700');
                     }
                     p.remove();
                 };
-                p.onerror = () => { v.d = 'LIVE'; div.querySelector('.dur-tag').innerText = 'LIVE'; div.querySelector('.dur-tag').classList.add('bg-red-700'); p.remove(); };
+                p.onerror = () => { v.d = 'LIVE'; div.querySelector('.dur-label').innerText = 'LIVE'; div.querySelector('.dur-label').classList.add('bg-red-700'); p.remove(); };
             } else if(v.type === 'm3u8') {
-                v.d = 'LIVE'; div.querySelector('.dur-tag').innerText = 'LIVE';
-                div.querySelector('.dur-tag').classList.add('bg-red-700');
+                v.d = 'LIVE'; div.querySelector('.dur-label').innerText = 'LIVE';
+                div.querySelector('.dur-label').classList.add('bg-red-700');
             }
             return div;
         }
 
-        // --- PLAYER CONTROLS ---
-        function startPlayer(v) {
-            playerLayer.style.display = 'flex';
-            maximizePlayer();
+        // --- PLAYER LOGIC ---
+        function launchPlayer(v) {
+            player.style.display = 'flex';
+            maximize();
             document.getElementById('v-title-main').innerText = v.t;
             document.getElementById('v-meta-main').innerText = v.meta;
             document.getElementById('mini-v-title').innerText = v.t;
 
             loadNativeAd();
 
+            // Direct Streaming with HLS
             if(Hls.isSupported() && (v.u.includes('.m3u8') || v.type === 'm3u8')) {
                 if(hls) hls.destroy();
-                hls = new Hls();
+                hls = new Hls({ enableWorker: true });
                 hls.loadSource(v.u);
                 hls.attachMedia(video);
                 hls.on(Hls.Events.MANIFEST_PARSED, () => {
                     video.play();
-                    generateQualityMenu();
+                    setupQuality();
                 });
             } else {
                 if(hls) { hls.destroy(); hls=null; }
                 video.src = v.u;
                 video.play();
-                document.getElementById('quality-popup').innerHTML = '<div class="q-item active">Standard (Auto)</div>';
+                document.getElementById('quality-menu').innerHTML = '<div class="p-item active">Standard (MP4)</div>';
             }
 
-            // Shuffle Suggestions
+            // Shuffle Suggested
             const grid = document.getElementById('suggestion-grid');
             grid.innerHTML = '';
-            const nextVods = [...masterVods].sort(() => 0.5 - Math.random()).slice(0, 10);
-            nextVods.forEach(item => { if(item.u !== v.u) grid.appendChild(createVideoCard(item)); });
+            const nextList = [...masterPool].sort(() => 0.5 - Math.random()).slice(0, 10);
+            nextList.forEach(item => { if(item.u !== v.u) grid.appendChild(createVideoCard(item)); });
             
-            toggleUI(true);
+            toggleControls(true);
         }
 
-        function generateQualityMenu() {
-            const menu = document.getElementById('quality-popup');
+        // --- ZOOM / ASPECT RATIO CYCLE ---
+        function cycleAspect() {
+            if(currentFit === 'fit') {
+                video.className = 'w-full h-full bg-black stretch';
+                currentFit = 'stretch';
+            } else if(currentFit === 'stretch') {
+                video.className = 'w-full h-full bg-black zoom';
+                currentFit = 'zoom';
+            } else {
+                video.className = 'w-full h-full bg-black fit';
+                currentFit = 'fit';
+            }
+        }
+
+        function setupQuality() {
+            const menu = document.getElementById('quality-menu');
             if(!hls || hls.levels.length === 0) return;
             let html = '<div class="p-3 text-[10px] font-black border-b border-zinc-800 text-zinc-500 uppercase">Quality</div>';
-            html += `<div class="q-item ${hls.currentLevel === -1 ? 'active' : ''}" onclick="setQuality(-1)">Auto</div>`;
+            html += `<div class="p-item ${hls.currentLevel === -1 ? 'active' : ''}" onclick="setQ(-1)">Auto</div>`;
             hls.levels.forEach((l, i) => {
-                html += `<div class="q-item ${hls.currentLevel === i ? 'active' : ''}" onclick="setQuality(${i})">${l.height}p</div>`;
+                html += `<div class="p-item ${hls.currentLevel === i ? 'active' : ''}" onclick="setQ(${i})">${l.height}p</div>`;
             });
             menu.innerHTML = html;
         }
 
-        function setQuality(idx) {
-            if(hls) hls.currentLevel = idx;
-            document.getElementById('quality-popup').style.display = 'none';
-            generateQualityMenu();
-        }
+        function setQ(idx) { if(hls) hls.currentLevel = idx; toggleMenu('quality-menu'); setupQuality(); }
 
-        function toggleQualityPopup() {
-            const p = document.getElementById('quality-popup');
-            p.style.display = p.style.display === 'flex' ? 'none' : 'flex';
+        function toggleMenu(id) {
+            const m = document.getElementById(id);
+            m.style.display = m.style.display === 'flex' ? 'none' : 'flex';
         }
 
         async function togglePiP() {
@@ -456,7 +472,7 @@
             } catch (e) {}
         }
 
-        function toggleUI(force) {
+        function toggleControls(force) {
             const ui = document.getElementById('yt-ui');
             if(force || !ui.classList.contains('show')) {
                 ui.classList.add('show');
@@ -465,17 +481,17 @@
             } else {
                 ui.classList.remove('show');
             }
-            document.getElementById('quality-popup').style.display = 'none';
+            document.getElementById('quality-menu').style.display = 'none';
         }
 
-        function playPause() {
-            const btn = document.getElementById('mid-play-btn');
+        function togglePlay() {
+            const btn = document.getElementById('p-play-btn');
             const mini = document.getElementById('mini-play-ico');
             if(video.paused) {
                 video.play();
                 btn.innerHTML = '<i class="fas fa-pause text-4xl"></i>';
                 mini.className = 'fas fa-pause text-xl';
-                toggleUI(true);
+                toggleControls(true);
             } else {
                 video.pause();
                 btn.innerHTML = '<i class="fas fa-play text-4xl ml-1"></i>';
@@ -484,8 +500,8 @@
             }
         }
 
-        function seekVideo(s) { video.currentTime += s; toggleUI(true); }
-        function scrubVideo(e) {
+        function seek(s) { video.currentTime += s; toggleControls(true); }
+        function handleScrub(e) {
             const rect = document.getElementById('prog-node').getBoundingClientRect();
             video.currentTime = ((e.clientX - rect.left) / rect.width) * video.duration;
         }
@@ -493,8 +509,8 @@
         video.addEventListener('timeupdate', () => {
             const perc = (video.currentTime / video.duration) * 100;
             document.getElementById('prog-filled').style.width = perc + '%';
-            document.getElementById('txt-now').innerText = formatDuration(video.currentTime);
-            document.getElementById('txt-total').innerText = formatDuration(video.duration);
+            document.getElementById('txt-now').innerText = fmt(video.currentTime);
+            document.getElementById('txt-total').innerText = fmt(video.duration);
         });
 
         video.addEventListener('ended', () => {
@@ -502,35 +518,44 @@
             if(next) next.click();
         });
 
-        // --- VIEW STATES ---
-        function minimizePlayer() { 
-            playerLayer.classList.remove('maximized');
-            playerLayer.classList.add('minimized');
+        // --- FULLSCREEN & ROTATION ---
+        function toggleFS() { 
+            const surface = document.getElementById('video-surface');
+            if(!document.fullscreenElement) {
+                surface.requestFullscreen().then(() => {
+                    // Try to lock orientation on mobile
+                    if (screen.orientation && screen.orientation.lock) {
+                        screen.orientation.lock('landscape').catch(e => console.log("Rotation locked by browser settings."));
+                    }
+                });
+            } else {
+                document.exitFullscreen();
+            }
+        }
+
+        function minimize() { 
+            player.classList.remove('maximized');
+            player.classList.add('minimized');
             document.getElementById('yt-ui').classList.remove('show'); 
         }
 
-        function maximizePlayer() { 
-            playerLayer.classList.remove('minimized');
-            playerLayer.classList.add('maximized');
-            toggleUI(true); 
+        function maximize() { 
+            player.classList.remove('minimized');
+            player.classList.add('maximized');
+            toggleControls(true); 
         }
 
         function closePlayer() { 
-            playerLayer.style.display = 'none'; 
-            playerLayer.classList.remove('maximized', 'minimized');
+            player.style.display = 'none'; 
+            player.classList.remove('maximized', 'minimized');
             video.pause(); video.src = ''; if(hls) hls.destroy(); 
         }
 
-        function toggleFullscreen() { 
-            if(!document.fullscreenElement) document.getElementById('video-surface').requestFullscreen();
-            else document.exitFullscreen();
-        }
+        function fmt(s) { if(!s || isNaN(s)) return "0:00"; const m = Math.floor(s/60), sc = Math.floor(s%60); return m + ":" + (sc < 10 ? "0" + sc : sc); }
+        function resetToHome() { document.querySelectorAll('.chip').forEach(c => c.classList.remove('active')); document.getElementById('chip-all').classList.add('active'); shuffleFeed(); renderList(true); closePlayer(); window.scrollTo(0,0); }
 
-        function formatDuration(s) { if(!s || isNaN(s)) return "0:00"; const m = Math.floor(s/60), sc = Math.floor(s%60); return m + ":" + (sc < 10 ? "0" + sc : sc); }
-        function resetFeedToHome() { document.querySelectorAll('.chip').forEach(c => c.classList.remove('active')); document.getElementById('chip-all').classList.add('active'); shuffleFeed(); renderFeed(true); closePlayer(); window.scrollTo(0,0); }
-
-        video.addEventListener('waiting', () => document.getElementById('loading-spinner').classList.remove('hidden'));
-        video.addEventListener('playing', () => document.getElementById('loading-spinner').classList.add('hidden'));
+        video.addEventListener('waiting', () => document.getElementById('player-spinner').classList.remove('hidden'));
+        video.addEventListener('playing', () => document.getElementById('player-spinner').classList.add('hidden'));
 
         init();
     </script>
