@@ -4,32 +4,33 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="theme-color" content="#0f0f0f">
-    <title>NetBongo Pro - YouTube Style</title>
+    <title>NetBongo Pro - Final Revenue Edition</title>
     
-    <!-- External Resources -->
+    <!-- External Libraries -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet">
 
-    <!-- AD UNIT 1: POPUNDER & UNIT 2: SOCIAL BAR -->
+    <!-- AD UNIT 1: POPUNDER -->
     <script src="https://momrollback.com/de/60/b6/de60b66a8ec87c7744d6d351c975ba33.js"></script>
+    <!-- AD UNIT 2: SOCIAL BAR -->
     <script src="https://momrollback.com/dc/95/4d/dc954dbecf4b21d37cedb37de585cf99.js"></script>
 
     <script>
         const PROXY = "https://netbongo.aiorbd.workers.dev/?url=";
         const SMARTLINK = "https://momrollback.com/jnt0mwiv7?key=c244b66638c840b3570508593d8b468e";
 
-        // AD UNIT 3: FEED BANNER 300x250
+        // AD UNIT 3: FEED BANNER 300x250 (Injection function)
         function getBannerCode() {
             return `
-            <div class="col-span-full w-full bg-[#0f0f0f] border-y border-[#222] py-6 flex flex-col items-center justify-center my-2 h-[280px]">
-                <span class="text-[10px] text-gray-600 font-bold mb-2 uppercase tracking-widest">NetBongo Ads</span>
-                <iframe srcdoc="<body style='margin:0;display:flex;justify-content:center;background:#0f0f0f;'><script type='text/javascript'>atOptions={'key':'1dc33aa030c9bbdf514894ff851','format':'iframe','height':250,'width':300,'params':{}};</scr`+`ipt><script src='https://momrollback.com/1dc33aa030c9bbdf514894ff851/invoke.js'></scr`+`ipt></body>" width="300" height="250" frameborder="0" scrolling="no"></iframe>
+            <div class="col-span-full w-full bg-[#141414] border-y border-zinc-800 py-6 flex flex-col items-center justify-center my-2 h-[280px] shadow-lg">
+                <span class="text-[9px] text-zinc-500 font-bold mb-2 uppercase tracking-widest">Sponsored by NetBongo</span>
+                <iframe srcdoc="<body style='margin:0;display:flex;justify-content:center;background:#141414;'><script type='text/javascript'>atOptions={'key':'1dc33aa030c9bbdf514894ff851','format':'iframe','height':250,'width':300,'params':{}};</scr`+`ipt><script src='https://momrollback.com/1dc33aa030c9bbdf514894ff851/invoke.js'></scr`+`ipt></body>" width="300" height="250" frameborder="0" scrolling="no"></iframe>
             </div>`;
         }
 
-        // AD UNIT 4: NATIVE AD (Player Info Area)
+        // AD UNIT 4: NATIVE AD (Player Details Area)
         function injectPlayerNative() {
             const el = document.getElementById('playerNativeAd');
             if(el) {
@@ -49,40 +50,45 @@
         #main-feed { padding-top: 56px; padding-bottom: 80px; }
 
         /* Chips Bar */
-        #chips-bar { position: sticky; top: 56px; width: 100%; height: 48px; background: #0f0f0f; z-index: 90; white-space: nowrap; overflow-x: auto; padding: 8px 12px; display: flex; gap: 8px; border-bottom: 1px solid #222; }
+        #chips-bar { position: sticky; top: 56px; width: 100%; height: 52px; background: #0f0f0f; z-index: 90; white-space: nowrap; overflow-x: auto; padding: 10px 12px; display: flex; gap: 8px; border-bottom: 1px solid #222; }
         .chip { padding: 6px 12px; border-radius: 8px; font-size: 14px; background: #272727; border: 1px solid #3f3f3f; color: #fff; font-weight: 500; cursor: pointer; transition: 0.2s; }
         .chip.active { background-color: #fff; color: #000; border-color: #fff; }
 
-        /* --- ADVANCED YT PLAYER LAYER --- */
+        /* Player Layer */
         #player-layer {
             position: fixed; z-index: 1000; background: #000;
-            transition: transform 0.35s cubic-bezier(0.2, 0, 0.2, 1);
+            transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
             display: none; flex-direction: column;
             width: 100%; height: 100%; top: 0; left: 0;
         }
         .maximized { transform: translateY(0); }
         .minimized {
-            height: 60px !important; width: 100% !important;
-            top: auto !important; bottom: 50px !important;
-            background: #212121 !important; border-top: 1px solid #333;
-            flex-direction: row !important; transform: translateY(0);
+            height: 60px !important; width: 96% !important; left: 2% !important;
+            top: auto !important; bottom: 75px !important;
+            background: #212121 !important; border: 1px solid #333; border-radius: 12px;
+            flex-direction: row !important; transform: translateY(0); overflow: hidden;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.9);
         }
 
-        #video-frame { position: relative; width: 100%; aspect-ratio: 16/9; background: #000; flex-shrink: 0; overflow: hidden; }
-        .minimized #video-frame { width: 106px; aspect-ratio: auto; height: 100%; }
+        #video-surface { position: relative; width: 100%; aspect-ratio: 16/9; background: #000; flex-shrink: 0; overflow: hidden; }
+        .minimized #video-surface { width: 106px; aspect-ratio: auto; height: 100%; }
 
-        /* Custom YT Controls */
+        /* YT Style Controls */
         #yt-ui { position: absolute; inset: 0; z-index: 20; background: rgba(0,0,0,0.45); display: flex; flex-direction: column; justify-content: space-between; opacity: 0; transition: opacity 0.25s; pointer-events: none; }
         #yt-ui.active { opacity: 1; pointer-events: auto; }
-        
         #tap-handler { position: absolute; inset: 0; z-index: 10; cursor: pointer; display: flex; }
         .tap-zone { width: 33.33%; height: 100%; }
 
         /* Progress Bar */
         .progress-container { width: 100%; height: 4px; background: rgba(255,255,255,0.2); cursor: pointer; position: relative; }
         .progress-filled { height: 100%; background: #f00; width: 0%; position: relative; }
-        .progress-filled::after { content: ''; position: absolute; right: -6px; top: -4px; width: 12px; height: 12px; background: #f00; border-radius: 50%; opacity: 0; transition: opacity 0.1s; }
+        .progress-filled::after { content: ''; position: absolute; right: -6px; top: -4px; width: 12px; height: 12px; background: #f00; border-radius: 50%; opacity: 0; }
         .progress-container:hover .progress-filled::after { opacity: 1; }
+
+        /* Quality Popup */
+        #quality-menu { position: absolute; bottom: 80px; right: 15px; background: #1a1a1a; border: 1px solid #333; border-radius: 12px; display: none; flex-direction: column; z-index: 1100; min-width: 130px; box-shadow: 0 10px 20px #000; }
+        .menu-item { padding: 10px 16px; font-size: 13px; border-bottom: 1px solid #222; cursor: pointer; }
+        .menu-item.active { color: #f00; font-weight: bold; }
 
         #mini-meta { display: none; flex: 1; align-items: center; padding: 0 12px; overflow: hidden; justify-content: space-between; }
         .minimized #mini-meta { display: flex; }
@@ -101,143 +107,147 @@
         </div>
         <div class="flex items-center gap-5 text-white">
             <i class="fas fa-search text-lg"></i>
-            <div class="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center font-bold text-xs border border-white/10 shadow-lg">NB</div>
+            <div class="w-8 h-8 rounded-full bg-blue-700 flex items-center justify-center font-bold text-xs">PRO</div>
         </div>
     </header>
 
-    <!-- Main App -->
+    <!-- Main -->
     <div id="main-feed">
         <!-- Chips Bar -->
         <div id="chips-bar" class="no-scrollbar">
-            <button class="chip active" id="chip-all" onclick="resetApp()">Home</button>
+            <button class="chip active" id="chip-all" onclick="resetFeed()">All Content</button>
+            <!-- M3U names dynamically added -->
         </div>
 
-        <!-- Video Feed (Native Scroll) -->
+        <!-- Video Feed -->
         <div id="video-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-y-6 pt-2">
-            <!-- Skeleton Loader -->
+            <!-- Initial Loader -->
             <div class="px-0 space-y-3 col-span-full">
                 <div class="aspect-video bg-gray-900 skeleton"></div>
                 <div class="flex gap-3 px-3 mt-3"><div class="w-10 h-10 rounded-full bg-gray-900 skeleton"></div><div class="flex-1 h-4 bg-gray-900 skeleton mt-2"></div></div>
             </div>
         </div>
 
-        <div id="pagination-box" class="text-center py-12 hidden">
-            <!-- UNIT 5: SMARTLINK AD -->
+        <div id="pagination" class="text-center py-12 hidden">
+            <!-- SMARTLINK ON MORE -->
             <button onclick="window.open(SMARTLINK, '_blank'); renderList(false)" class="bg-[#272727] border border-[#3f3f3f] px-12 py-3 rounded-full font-bold text-sm hover:bg-white hover:text-black transition">
                 Load More Content
             </button>
         </div>
     </div>
 
-    <!-- YouTube Style Player Overlay -->
+    <!-- YouTube Style Player -->
     <div id="player-layer">
-        <div id="video-frame">
+        <div id="video-surface">
             <video id="main-video" class="w-full h-full object-contain bg-black" playsinline></video>
             
-            <!-- Touch Handler -->
+            <!-- Tap Handler for UI -->
             <div id="tap-handler">
                 <div class="tap-zone" ondblclick="seekVideo(-10)" onclick="toggleUI()"></div>
                 <div class="tap-zone" onclick="toggleUI()"></div>
                 <div class="tap-zone" ondblclick="seekVideo(10)" onclick="toggleUI()"></div>
             </div>
 
-            <!-- YT Style Controls UI -->
+            <!-- UI Controls Overlay -->
             <div id="yt-ui">
                 <!-- Top Nav -->
                 <div class="flex justify-between p-3">
-                    <button onclick="minimizePlayer()" class="text-white p-2 drop-shadow-lg"><i class="fas fa-chevron-down text-2xl"></i></button>
+                    <button onclick="minimizePlayer()" class="text-white p-2"><i class="fas fa-chevron-down text-2xl"></i></button>
                     <div class="flex gap-5 text-white p-2">
-                        <i class="fas fa-closed-captioning text-xl"></i>
-                        <i class="fas fa-gear text-xl"></i>
+                        <button onclick="togglePiP()"><i class="fas fa-window-restore text-xl"></i></button>
+                        <button onclick="toggleQualityMenu()"><i class="fas fa-gear text-xl"></i></button>
                     </div>
                 </div>
 
-                <!-- Middle Controls -->
+                <!-- Center Controls -->
                 <div class="flex justify-center items-center gap-14">
-                    <button onclick="seekVideo(-10)" class="text-white active:scale-75 transition-transform"><i class="fas fa-backward-step text-3xl"></i></button>
-                    <div id="player-spinner" class="hidden animate-spin rounded-full h-12 w-12 border-4 border-white border-t-transparent absolute"></div>
-                    <button id="p-play-btn" onclick="playPause()" class="w-16 h-16 bg-black/30 rounded-full flex items-center justify-center text-white border border-white/20 active:scale-95 transition backdrop-blur-sm">
+                    <button onclick="seekVideo(-10)" class="text-white/80 text-3xl"><i class="fas fa-backward-step"></i></button>
+                    <div id="player-buffering" class="hidden animate-spin rounded-full h-12 w-12 border-4 border-white border-t-transparent absolute"></div>
+                    <button id="p-play-btn" onclick="playPause()" class="w-16 h-16 bg-black/40 rounded-full flex items-center justify-center text-white border border-white/20">
                         <i class="fas fa-pause text-4xl"></i>
                     </button>
-                    <button onclick="seekVideo(10)" class="text-white active:scale-75 transition-transform"><i class="fas fa-forward-step text-3xl"></i></button>
+                    <button onclick="seekVideo(10)" class="text-white/80 text-3xl"><i class="fas fa-forward-step"></i></button>
                 </div>
 
-                <!-- Bottom Controls -->
+                <!-- Bottom Progress -->
                 <div class="bg-gradient-to-t from-black/80 via-black/20 to-transparent">
                     <div class="progress-container" id="prog-node" onclick="handleScrub(event)">
                         <div class="progress-filled" id="prog-filled"></div>
                     </div>
                     <div class="flex justify-between items-center px-4 py-3">
                         <div class="flex items-center gap-4 text-xs font-bold font-mono">
-                            <span id="time-now">0:00</span> <span class="text-gray-500">/</span> <span id="time-total">0:00</span>
+                            <span id="time-now">0:00</span> <span class="text-zinc-600">/</span> <span id="time-total">0:00</span>
                         </div>
                         <button onclick="toggleFullscreen()" class="text-white"><i class="fas fa-expand"></i></button>
                     </div>
                 </div>
             </div>
 
-            <!-- Mini Player UI -->
+            <!-- Quality Menu Popup -->
+            <div id="quality-menu" class="no-scrollbar"></div>
+
+            <!-- Mini View Meta -->
             <div id="mini-meta" onclick="maximizePlayer()">
                 <div class="flex-1 overflow-hidden pr-3">
                     <p id="mini-title" class="text-sm font-bold text-white truncate"></p>
-                    <p class="text-[10px] text-gray-400 font-bold">NetBongo Official</p>
+                    <p class="text-[10px] text-zinc-400 uppercase font-black">NetBongo Official</p>
                 </div>
-                <div class="flex items-center gap-6 pr-1">
+                <div class="flex items-center gap-6 pr-2">
                     <button onclick="event.stopPropagation(); playPause()" class="text-white"><i id="mini-p-icon" class="fas fa-pause text-xl"></i></button>
                     <button onclick="event.stopPropagation(); closePlayer()" class="text-white"><i class="fas fa-times text-xl"></i></button>
                 </div>
             </div>
         </div>
 
-        <!-- Player Details & Suggestions -->
-        <div id="player-body" class="flex-1 overflow-y-auto bg-[#0f0f0f] p-4">
-            <h1 id="v-title-full" class="text-lg font-bold leading-tight mb-2">Video Title Loading...</h1>
-            <p id="v-meta-full" class="text-xs text-gray-400 mb-4 font-bold">0 views • Just now</p>
+        <!-- Details -->
+        <div id="player-details" class="flex-1 overflow-y-auto bg-[#0f0f0f] p-4">
+            <h1 id="v-title-full" class="text-xl font-extrabold leading-tight mb-2">Title</h1>
+            <p id="v-meta-full" class="text-xs text-zinc-400 font-bold mb-5">Views • Time</p>
             
-            <div class="flex items-center justify-between border-b border-[#222] pb-4 mb-4">
+            <div class="flex items-center justify-between border-b border-zinc-800 pb-5 mb-5">
                 <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 bg-red-700 rounded-full flex items-center justify-center font-bold text-xs shadow-lg shadow-red-900/20">NB</div>
-                    <div><p class="font-bold text-sm">NetBongo</p><p class="text-[10px] text-gray-500 font-black uppercase tracking-tighter">Verified Streamer</p></div>
+                    <div class="w-10 h-10 bg-red-700 rounded-full flex items-center justify-center font-bold text-xs shadow-lg">NB</div>
+                    <div><p class="font-bold text-sm">NetBongo</p><p class="text-[10px] text-zinc-500 uppercase font-black tracking-widest">Verified</p></div>
                 </div>
-                <button class="bg-white text-black px-4 py-1.5 rounded-full text-xs font-bold active:scale-95 transition">Subscribe</button>
+                <button class="bg-white text-black px-5 py-2 rounded-full text-xs font-black active:scale-95 transition">Subscribe</button>
             </div>
 
-            <!-- UNIT 4: NATIVE AD AREA -->
+            <!-- NATIVE AD UNDER TITLE -->
             <div id="playerNativeAd" class="w-full mb-6 min-h-[80px]"></div>
 
-            <h3 class="text-xs font-black text-gray-500 uppercase tracking-widest mb-4 italic">আপনার জন্য প্রস্তাবিত</h3>
+            <h3 class="text-xs font-black text-zinc-500 uppercase tracking-widest mb-5 border-l-4 border-red-600 pl-3">আপ পরবর্তী</h3>
             <div id="suggestion-grid" class="grid grid-cols-1 gap-5 pb-24"></div>
         </div>
     </div>
 
-    <!-- Footer Navigation -->
-    <nav class="fixed bottom-0 w-full h-[55px] bg-[#0f0f0f] border-t border-[#222] flex justify-around items-center z-[150] text-[10px]">
+    <!-- Navigation -->
+    <nav class="fixed bottom-0 w-full h-[60px] bg-[#0f0f0f] border-t border-[#222] flex justify-around items-center z-[150] text-[10px] backdrop-blur-xl">
         <div class="flex flex-col items-center gap-1 w-full text-white cursor-pointer active:scale-90 transition" onclick="location.reload()">
-            <i class="fas fa-home text-xl"></i><span class="font-bold">Home</span>
+            <i class="fas fa-house text-xl"></i><span class="font-bold">Home</span>
         </div>
-        <div class="flex flex-col items-center gap-1 w-full text-gray-500 cursor-pointer">
+        <div class="flex flex-col items-center gap-1 w-full text-zinc-500 cursor-pointer">
             <i class="fab fa-youtube text-xl"></i><span class="font-bold">Shorts</span>
         </div>
-        <div class="flex flex-col items-center gap-1 w-full text-gray-500 cursor-pointer">
-            <i class="fas fa-plus-circle text-2xl text-white"></i>
+        <div class="flex flex-col items-center gap-1 w-full text-zinc-500 cursor-pointer">
+            <i class="fas fa-plus-circle text-3xl text-white"></i>
         </div>
-        <div class="flex flex-col items-center gap-1 w-full text-gray-500 cursor-pointer" onclick="window.open(SMARTLINK, '_blank')">
-            <i class="fas fa-crown text-xl"></i><span class="font-bold">Premium</span>
+        <div class="flex flex-col items-center gap-1 w-full text-zinc-500 cursor-pointer" onclick="window.open(SMARTLINK, '_blank')">
+            <i class="fas fa-gem text-xl"></i><span class="font-bold">Premium</span>
         </div>
-        <div class="flex flex-col items-center gap-1 w-full text-gray-500 cursor-pointer">
+        <div class="flex flex-col items-center gap-1 w-full text-zinc-500 cursor-pointer">
             <i class="fas fa-user-circle text-xl"></i><span class="font-bold">Library</span>
         </div>
     </nav>
 
     <script>
-        const SHEET_CSV = "aHR0cHM6Ly9kb2NzLmdvb2dsZS5jb20vc3ByZWFkc2hlZXRzL2QvZS8yUEFDWC0xdlR1Z09RWHdMSUd5Vm9mRmx2RkxLTjdFX1BOZW1Da0lEY2R3QjRkR2NvUDE2Z09uVGNtSjJpU001bHJfWUZWUHRzMUZiYzVnNWdrdkU0Uy9wdWI/b3V0cHV0PWNzdg==";
+        const CSV_API = "aHR0cHM6Ly9kb2NzLmdvb2dsZS5jb20vc3ByZWFkc2hlZXRzL2QvZS8yUEFDWC0xdlR1Z09RWHdMSUd5Vm9mRmx2RkxLTjdFX1BOZW1Da0lEY2R3QjRkR2NvUDE2Z09uVGNtSjJpU001bHJfWUZWUHRzMUZiYzVnNWdrdkU0Uy9wdWI/b3V0cHV0PWNzdg==";
         
-        let masterPool = [], feedList = [], pointer = 0, hls = null, uiTimer;
+        let masterPool = [], feedPool = [], m3uCategories = [], pointer = 0, hls = null, uiTimer;
         const video = document.getElementById('main-video');
         const playerLayer = document.getElementById('player-layer');
 
         async function init() {
-            // Android Back Button logic
+            // Android Back Logic
             window.history.pushState({p:'h'}, "", "");
             window.onpopstate = () => {
                 if(playerLayer.classList.contains('maximized')) {
@@ -249,43 +259,87 @@
             };
 
             try {
-                const res = await fetch(PROXY + encodeURIComponent(atob(SHEET_CSV)));
+                const res = await fetch(PROXY + encodeURIComponent(atob(CSV_API)));
                 const text = await res.text();
                 const raw = text.split('\n').slice(1).map(line => {
                     const c = line.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(s => s.replace(/^"|"$/g, '').trim());
                     return { 
-                        t: c[0] || "NetBongo Content", u: c[1], type: c[2]||'mp4', i: c[3], 
-                        meta: (Math.floor(Math.random()*900)+10)+'K views • ' + (Math.floor(Math.random()*23)+1)+'h ago',
+                        t: c[0] || "NetBongo Premium", u: c[1], type: c[2]||'mp4', i: c[3], 
+                        meta: (Math.floor(Math.random()*900)+10)+'K views • ' + (Math.floor(Math.random()*20)+1)+'h ago',
                         d: '0:00' 
                     };
                 }).filter(v => v.u);
 
                 const m3uLists = raw.filter(i => i.u.toLowerCase().includes('.m3u') && !i.u.toLowerCase().includes('.m3u8'));
-                const vodList = raw.filter(i => !m3uLists.includes(i));
+                const vods = raw.filter(i => !m3uLists.includes(i));
 
-                // Render M3U Category Chips
-                const bar = document.getElementById('chips-bar');
-                m3uLists.forEach(f => {
+                masterPool = vods;
+
+                // Load M3U data as categories and mix into Home
+                const chipBar = document.getElementById('chips-bar');
+                for(const m3u of m3uLists) {
                     const btn = document.createElement('button');
                     btn.className = "chip";
-                    btn.innerText = f.t;
-                    btn.onclick = () => loadPlaylist(f.u, btn);
-                    bar.appendChild(btn);
-                });
+                    btn.innerText = m3u.t;
+                    btn.onclick = () => filterByPlaylist(m3u.u, btn);
+                    chipBar.appendChild(btn);
+                    
+                    // Mix into master for "All Content"
+                    await fetchM3URemote(m3u.u);
+                }
 
-                masterPool = vodList;
-                feedList = [...masterPool].sort(() => 0.5 - Math.random());
+                shuffleFeed();
                 renderList(true);
-            } catch(e) { console.error("Init Error:", e); }
+            } catch(e) { console.error(e); }
         }
+
+        async function fetchM3URemote(url) {
+            try {
+                const res = await fetch(PROXY + encodeURIComponent(url));
+                const text = await res.text();
+                const list = parseM3UString(text);
+                masterPool = [...masterPool, ...list];
+            } catch(e){}
+        }
+
+        function parseM3UString(text) {
+            const lines = text.split('\n');
+            let list = []; let tmp = {};
+            lines.forEach(line => {
+                line = line.trim();
+                if (line.startsWith('#EXTINF:')) {
+                    const title = line.split(',').pop();
+                    const logo = line.match(/tvg-logo="([^"]*)"/);
+                    tmp = { t: title || "Stream", i: logo ? logo[1] : "", type: 'm3u8', d: 'LIVE', meta: 'Live HD Stream' };
+                } else if (line.startsWith('http')) {
+                    tmp.u = line;
+                    if(tmp.t) { list.push(tmp); tmp = {}; }
+                }
+            });
+            return list;
+        }
+
+        async function filterByPlaylist(url, btn) {
+            document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+            btn.classList.add('active');
+            document.getElementById('video-grid').innerHTML = '<div class="col-span-full py-40 text-center"><i class="fas fa-spinner fa-spin text-4xl text-red-600"></i></div>';
+            try {
+                const res = await fetch(PROXY + encodeURIComponent(url));
+                const text = await res.text();
+                feedPool = parseM3UString(text).sort(() => 0.5 - Math.random());
+                renderList(true);
+            } catch(e){}
+        }
+
+        function shuffleFeed() { feedPool = [...masterPool].sort(() => 0.5 - Math.random()); }
 
         function renderList(reset) {
             const grid = document.getElementById('video-grid');
             if(reset) { grid.innerHTML = ''; pointer = 0; }
             
-            const slice = feedList.slice(pointer, pointer + 12);
-            slice.forEach((v, i) => {
-                // AD UNIT 3: FEED BANNER
+            const chunk = feedPool.slice(pointer, pointer + 12);
+            chunk.forEach((v, i) => {
+                // UNIT 3: BANNER AD EVERY 6 ITEMS
                 if((pointer+i) > 0 && (pointer+i) % 6 === 0) {
                     const adDiv = document.createElement('div');
                     adDiv.className = "col-span-full";
@@ -294,37 +348,38 @@
                 }
                 grid.appendChild(createVideoCard(v));
             });
-            pointer += slice.length;
-            document.getElementById('pagination-box').classList.toggle('hidden', pointer >= feedList.length);
+            pointer += chunk.length;
+            document.getElementById('pagination').classList.toggle('hidden', pointer >= feedPool.length);
         }
 
         function createVideoCard(v) {
             const div = document.createElement('div');
-            div.className = "cursor-pointer active:bg-[#222] transition duration-200 mb-2 group";
+            div.className = "cursor-pointer active:bg-zinc-900 transition duration-300 mb-2 group px-4 md:px-0";
             div.onclick = () => startPlayer(v);
             
-            const poster = v.i && v.i.includes('http') ? (PROXY + encodeURIComponent(v.i)) : 'https://via.placeholder.com/400x225/111/fff?text=NetBongo';
+            const thumb = v.i && v.i.includes('http') ? (PROXY + encodeURIComponent(v.i)) : 'https://via.placeholder.com/400x225/111/fff?text=NetBongo';
             
             div.innerHTML = `
-                <div class="aspect-video bg-[#0a0a0a] relative overflow-hidden group-hover:opacity-80">
-                    <img src="${poster}" class="w-full h-full object-cover">
+                <div class="aspect-video bg-[#111] relative overflow-hidden md:rounded-xl shadow-lg group-hover:opacity-80">
+                    <img src="${thumb}" class="w-full h-full object-cover">
                     <div class="absolute bottom-2 right-2 bg-black/80 text-white text-[11px] px-1.5 py-0.5 rounded font-black border border-white/10 dur-tag">${v.d}</div>
                 </div>
-                <div class="flex gap-3 mt-3 px-4 pb-4">
-                    <div class="w-9 h-9 rounded-full bg-gradient-to-tr from-gray-800 to-black flex-shrink-0 border border-white/10"></div>
-                    <div class="flex-1 overflow-hidden">
+                <div class="flex gap-4 mt-3 pb-5">
+                    <div class="w-9 h-9 rounded-full bg-gradient-to-tr from-zinc-800 to-black flex-shrink-0 border border-zinc-800"></div>
+                    <div class="flex-1 overflow-hidden pr-4">
                         <h4 class="text-[15px] font-bold text-white line-clamp-2 leading-tight">${v.t}</h4>
-                        <p class="text-xs text-gray-400 mt-1 font-bold">${v.meta}</p>
+                        <p class="text-xs text-zinc-500 mt-1 font-bold">${v.meta}</p>
                     </div>
+                    <i class="fas fa-ellipsis-v text-zinc-600 text-xs mt-1"></i>
                 </div>
             `;
             
-            // Duration Probing
-            if(v.d === '0:00') {
+            // Duration Probe
+            if(v.d === '0:00' && v.type !== 'm3u8') {
                 const p = document.createElement('video');
                 p.src = v.u; p.preload = 'metadata';
                 p.onloadedmetadata = () => { 
-                    v.d = formatDuration(p.duration); 
+                    v.d = fmt(p.duration); 
                     div.querySelector('.dur-tag').innerText = v.d;
                     p.remove();
                 };
@@ -340,27 +395,7 @@
             return div;
         }
 
-        async function loadPlaylist(url, btn) {
-            document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
-            btn.classList.add('active');
-            document.getElementById('video-grid').innerHTML = '<div class="col-span-full py-40 text-center"><i class="fas fa-spinner fa-spin text-4xl text-red-600"></i></div>';
-            try {
-                const res = await fetch(PROXY + encodeURIComponent(url));
-                const text = await res.text();
-                const list = []; let tmp = {};
-                text.split('\n').forEach(line => {
-                    if(line.startsWith('#EXTINF:')) tmp = { t: line.split(',').pop().trim(), i: line.match(/tvg-logo="([^"]*)"/)?.[1] };
-                    else if(line.length > 10 && !line.startsWith('#') && tmp.t) {
-                        tmp.u = line.trim(); tmp.type = 'm3u8'; tmp.meta = "Live HD Stream"; tmp.d = 'LIVE';
-                        list.push(tmp); tmp = {};
-                    }
-                });
-                feedList = list.sort(() => 0.5 - Math.random());
-                renderList(true);
-            } catch(e){}
-        }
-
-        // --- CUSTOM YT PLAYER FUNCTIONS ---
+        // --- PLAYER ENGINE ---
         function startPlayer(v) {
             playerLayer.style.display = 'flex';
             maximizePlayer();
@@ -370,28 +405,61 @@
 
             injectPlayerNative();
 
-            // Direct Play with Latest Hls.js
             if(Hls.isSupported() && (v.u.includes('.m3u8') || v.type === 'm3u8')) {
                 if(hls) hls.destroy();
                 hls = new Hls({ enableWorker: true });
                 hls.loadSource(v.u);
                 hls.attachMedia(video);
-                hls.on(Hls.Events.MANIFEST_PARSED, () => video.play());
+                hls.on(Hls.Events.MANIFEST_PARSED, () => {
+                    video.play();
+                    setupQualityButtons();
+                });
             } else {
                 if(hls) { hls.destroy(); hls=null; }
+                document.getElementById('quality-menu').innerHTML = '<div class="menu-item active">Standard</div>';
                 video.src = v.u;
                 video.play();
             }
 
-            // Randomized Suggested Feed
+            // Shuffle Suggestions
             const grid = document.getElementById('suggestion-grid');
             grid.innerHTML = '';
-            const suggs = [...masterPool].sort(() => 0.5 - Math.random()).slice(0, 12);
-            suggs.forEach(item => {
-                if(item.u !== v.u) grid.appendChild(createVideoCard(item));
-            });
+            const suggs = [...masterPool].sort(() => 0.5 - Math.random()).slice(0, 10);
+            suggs.forEach(item => { if(item.u !== v.u) grid.appendChild(createVideoCard(item)); });
             
             toggleUI(true);
+        }
+
+        function setupQualityButtons() {
+            const menu = document.getElementById('quality-menu');
+            if(!hls || hls.levels.length === 0) {
+                menu.innerHTML = '<div class="menu-item active">Standard</div>';
+                return;
+            }
+            let html = '<div class="p-3 text-[10px] font-black border-b border-zinc-800 text-zinc-500 uppercase">Quality</div>';
+            html += `<div class="menu-item ${hls.currentLevel === -1 ? 'active' : ''}" onclick="changeQuality(-1)">Auto</div>`;
+            hls.levels.forEach((lvl, i) => {
+                html += `<div class="menu-item ${hls.currentLevel === i ? 'active' : ''}" onclick="changeQuality(${i})">${lvl.height}p</div>`;
+            });
+            menu.innerHTML = html;
+        }
+
+        function changeQuality(index) {
+            if(hls) hls.currentLevel = index;
+            document.getElementById('quality-menu').style.display = 'none';
+            setupQualityButtons();
+        }
+
+        function toggleQualityMenu() {
+            const m = document.getElementById('quality-menu');
+            m.style.display = m.style.display === 'flex' ? 'none' : 'flex';
+        }
+
+        async function togglePiP() {
+            try {
+                if (video !== document.pictureInPictureElement) await video.requestPictureInPicture();
+                else await document.exitPictureInPicture();
+            } catch (e) { console.error("PiP Fail", e); }
         }
 
         function toggleUI(force) {
@@ -403,6 +471,7 @@
             } else {
                 ui.classList.remove('active');
             }
+            document.getElementById('quality-menu').style.display = 'none';
         }
 
         function playPause() {
@@ -424,15 +493,14 @@
         function seekVideo(s) { video.currentTime += s; toggleUI(true); }
         function handleScrub(e) {
             const rect = document.getElementById('prog-node').getBoundingClientRect();
-            const pos = (e.clientX - rect.left) / rect.width;
-            video.currentTime = pos * video.duration;
+            video.currentTime = ((e.clientX - rect.left) / rect.width) * video.duration;
         }
 
         video.addEventListener('timeupdate', () => {
             const per = (video.currentTime / video.duration) * 100;
             document.getElementById('prog-filled').style.width = per + '%';
-            document.getElementById('time-now').innerText = formatDuration(video.currentTime);
-            document.getElementById('time-total').innerText = formatDuration(video.duration);
+            document.getElementById('time-now').innerText = fmt(video.currentTime);
+            document.getElementById('time-total').innerText = fmt(video.duration);
         });
 
         video.addEventListener('ended', () => {
@@ -444,20 +512,15 @@
         function maximizePlayer() { playerLayer.className = 'maximized'; toggleUI(true); }
         function closePlayer() { playerLayer.style.display = 'none'; video.pause(); video.src = ''; if(hls) hls.destroy(); }
         function toggleFullscreen() { 
-            if(!document.fullscreenElement) document.getElementById('video-frame').requestFullscreen();
+            if(!document.fullscreenElement) document.getElementById('video-surface').requestFullscreen();
             else document.exitFullscreen();
         }
 
-        function formatDuration(s) { 
-            if(!s || isNaN(s)) return "0:00";
-            const m = Math.floor(s/60), sc = Math.floor(s%60); 
-            return m + ":" + (sc < 10 ? "0" + sc : sc); 
-        }
+        function fmt(s) { if(!s || isNaN(s)) return "0:00"; const m = Math.floor(s/60), sc = Math.floor(s%60); return m + ":" + (sc < 10 ? "0" + sc : sc); }
+        function resetFeed() { document.querySelectorAll('.chip').forEach(c => c.classList.remove('active')); document.getElementById('chip-all').classList.add('active'); shuffleFeed(); renderList(true); closePlayer(); window.scrollTo(0,0); }
 
-        function resetApp() { closePlayer(); window.scrollTo({top:0, behavior:'smooth'}); }
-        
-        video.addEventListener('waiting', () => document.getElementById('player-spinner').classList.remove('hidden'));
-        video.addEventListener('playing', () => document.getElementById('player-spinner').classList.add('hidden'));
+        video.addEventListener('waiting', () => document.getElementById('player-buffering').classList.remove('hidden'));
+        video.addEventListener('playing', () => document.getElementById('player-buffering').classList.add('hidden'));
 
         init();
     </script>
