@@ -1,389 +1,263 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { 
-  Home, 
-  Search, 
-  Play, 
-  X, 
-  ChevronDown, 
-  Maximize2, 
-  Settings, 
-  Heart, 
-  Layers,
-  Crown
-} from 'lucide-react';
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#000000">
+    <title>NetBongo Pro - Premium Web App</title>
+    
+    <!-- CDNs -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dplayer/dist/DPlayer.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/dplayer/dist/DPlayer.min.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Urbanist:wght@400;600;700;900&display=swap" rel="stylesheet">
 
-// --- CONFIGURATION ---
-const PROXY = "https://netbongo.aiorbd.workers.dev/?url=";
-const SHEET_ID = "aHR0cHM6Ly9kb2NzLmdvb2dsZS5jb20vc3ByZWFkc2hlZXRzL2QvZS8yUEFDWC0xdlR1Z09RWHdMSUd5Vm9mRmx2RkxLTjdFX1BOZW1Da0lEY2R3QjRkR2NvUDE2Z09uVGNtSjJpU001bHJfWUZWUHRzMUZiYzVnNWdrdkU0Uy9wdWI/b3V0cHV0PWNzdg==";
-const SMARTLINK = "https://momrollback.com/jnt0mwiv7?key=c244b66638c840b3570508593d8b468e";
+    <!-- AD UNIT 1: POPUNDER & UNIT 2: SOCIAL BAR -->
+    <script src="https://momrollback.com/de/60/b6/de60b66a8ec87c7744d6d351c975ba33.js"></script>
+    <script src="https://momrollback.com/dc/95/4d/dc954dbecf4b21d37cedb37de585cf99.js"></script>
 
-const App = () => {
-  const [allVideos, setAllVideos] = useState([]);
-  const [feed, setFeed] = useState([]);
-  const [playlists, setPlaylists] = useState([]);
-  const [activeTab, setActiveTab] = useState('all');
-  const [loading, setLoading] = useState(true);
-  const [searchOpen, setSearchOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
-  
-  // Player State
-  const [playerState, setPlayerState] = useState('closed'); // closed, full, mini
-  const [currentVideo, setCurrentVideo] = useState(null);
-  const dpRef = useRef(null);
-  const playerContainerRef = useRef(null);
-
-  // 1. Load Data from Sheet & Parse M3U
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const res = await fetch(PROXY + encodeURIComponent(atob(SHEET_ID)));
-        const text = await res.text();
-        const rows = text.split('\n').slice(1);
+    <style>
+        body { background-color: #000; color: #fff; font-family: 'Urbanist', sans-serif; margin: 0; padding: 0; overflow-x: hidden; -webkit-tap-highlight-color: transparent; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .skeleton { background: linear-gradient(90deg, #0d0d0d 25%, #1a1a1a 50%, #0d0d0d 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; }
+        @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
         
-        let initialVideos = [];
-        let m3uLinks = [];
+        /* DPlayer Custom Fix */
+        .dplayer-controller { background: linear-gradient(to top, rgba(0,0,0,0.9), transparent) !important; }
+        .dplayer-setting-item { color: #fff !important; }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
 
-        rows.forEach(row => {
-          const cols = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(s => s.replace(/^"|"$/g, '').trim());
-          if (cols[1]) {
-            const data = {
-              title: cols[0] || "Untitled",
-              url: cols[1],
-              type: cols[2] || 'mp4',
-              thumb: cols[3] || 'https://via.placeholder.com/400x225/111/fff?text=NetBongo',
-              views: (Math.floor(Math.random() * 900) + 10) + 'K',
-              time: (Math.floor(Math.random() * 20) + 1) + 'h ago'
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+
+        const PROXY = "https://netbongo.aiorbd.workers.dev/?url=";
+        const SHEET_ID = "aHR0cHM6Ly9kb2NzLmdvb2dsZS5jb20vc3ByZWFkc2hlZXRzL2QvZS8yUEFDWC0xdlR1Z09RWHdMSUd5Vm9mRmx2RkxLTjdFX1BOZW1Da0lEY2R3QjRkR2NvUDE2Z09uVGNtSjJpU001bHJfWUZWUHRzMUZiYzVnNWdrdkU0Uy9wdWI/b3V0cHV0PWNzdg==";
+        const SMARTLINK = "https://momrollback.com/jnt0mwiv7?key=c244b66638c840b3570508593d8b468e";
+
+        function App() {
+            const [allVideos, setAllVideos] = useState([]);
+            const [feed, setFeed] = useState([]);
+            const [playlists, setPlaylists] = useState([]);
+            const [activeTab, setActiveTab] = useState('all');
+            const [loading, setLoading] = useState(true);
+            const [playerState, setPlayerState] = useState('closed'); // closed, full, mini
+            const [currentVideo, setCurrentVideo] = useState(null);
+            
+            const dpRef = useRef(null);
+
+            // Fetch Data
+            useEffect(() => {
+                const loadData = async () => {
+                    try {
+                        const res = await fetch(PROXY + encodeURIComponent(atob(SHEET_ID)));
+                        const text = await res.text();
+                        const rows = text.split('\n').slice(1);
+                        
+                        let initialVids = [];
+                        let m3uLinks = [];
+
+                        rows.forEach(row => {
+                            const cols = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(s => s.replace(/^"|"$/g, '').trim());
+                            if (cols[1]) {
+                                const data = {
+                                    title: cols[0] || "NetBongo Premium",
+                                    url: cols[1],
+                                    type: cols[2] || 'mp4',
+                                    thumb: cols[3] || 'https://via.placeholder.com/400x225/111/fff?text=NetBongo',
+                                    meta: (Math.floor(Math.random() * 900) + 10) + 'K views • ' + (Math.floor(Math.random() * 20) + 1) + 'h ago'
+                                };
+                                if (data.url.toLowerCase().includes('.m3u') && data.type !== 'm3u8') m3uLinks.push(data);
+                                else initialVids.push(data);
+                            }
+                        });
+
+                        setAllVideos(initialVids);
+                        setFeed(initialVids.sort(() => 0.5 - Math.random()));
+                        setPlaylists(m3uLinks);
+                        setLoading(false);
+                    } catch (e) { console.error(e); }
+                };
+                loadData();
+            }, []);
+
+            const parseM3U = async (m3u) => {
+                setLoading(true);
+                setActiveTab(m3u.title);
+                try {
+                    const res = await fetch(PROXY + encodeURIComponent(m3u.url));
+                    const text = await res.text();
+                    const lines = text.split('\n');
+                    let items = [];
+                    let tmp = {};
+
+                    lines.forEach(line => {
+                        line = line.trim();
+                        if (line.startsWith('#EXTINF')) {
+                            const title = line.split(',').pop();
+                            const logoMatch = line.match(/tvg-logo="([^"]*)"/);
+                            tmp = { title: title || "Live TV", thumb: logoMatch ? logoMatch[1] : m3u.thumb, type: 'm3u8', meta: 'Live Stream' };
+                        } else if (line.startsWith('http')) {
+                            tmp.url = line;
+                            if (tmp.title) { items.push(tmp); tmp = {}; }
+                        }
+                    });
+                    setFeed(items.sort(() => 0.5 - Math.random()));
+                } catch (e) { console.error(e); }
+                setLoading(false);
             };
 
-            if (data.url.toLowerCase().includes('.m3u') && data.type !== 'm3u8') {
-              m3uLinks.push(data);
-            } else {
-              initialVideos.push(data);
-            }
-          }
-        });
+            const launchPlayer = (video) => {
+                setCurrentVideo(video);
+                setPlayerState('full');
+                
+                setTimeout(() => {
+                    if (dpRef.current) dpRef.current.destroy();
+                    dpRef.current = new DPlayer({
+                        container: document.getElementById('dplayer-node'),
+                        autoplay: true,
+                        video: { url: video.url, type: (video.url.includes('.m3u8') || video.type === 'm3u8') ? 'hls' : 'auto' },
+                        theme: '#ff0000',
+                        playbackSpeed: [0.5, 1, 1.5, 2]
+                    });
+                    
+                    // Ad Injection on Player Load
+                    const adArea = document.getElementById('nativeAdPlace');
+                    if(adArea) {
+                        adArea.innerHTML = `<div id="container-3849795d04c7beaa7bfc1d4d0fa4fb4b"></div>`;
+                        const s = document.createElement('script'); s.async=true; s.src="https://momrollback.com/3849795d04c7beaa7bfc1d4d0fa4fb4b/invoke.js";
+                        adArea.appendChild(s);
+                    }
+                }, 100);
+            };
 
-        setAllVideos(initialVideos);
-        setFeed(initialVideos.sort(() => 0.5 - Math.random()));
-        setPlaylists(m3uLinks);
-        setLoading(false);
-      } catch (error) {
-        console.error("Data Fetch Error:", error);
-      }
-    };
-    fetchData();
-  }, []);
+            const closePlayer = () => { if (dpRef.current) dpRef.current.destroy(); setPlayerState('closed'); setCurrentVideo(null); };
 
-  // M3U Playlist Parser Logic
-  const handlePlaylistSelect = async (m3u) => {
-    setLoading(true);
-    setActiveTab(m3u.title);
-    try {
-      const res = await fetch(PROXY + encodeURIComponent(m3u.url));
-      const text = await res.text();
-      const lines = text.split('\n');
-      let items = [];
-      let currentItem = {};
+            return (
+                <div className="pb-20">
+                    {/* Header */}
+                    <header className="fixed top-0 w-full h-14 bg-black/90 backdrop-blur-xl border-b border-zinc-800 flex items-center justify-between px-4 z-[100]">
+                        <div className="flex items-center gap-2" onClick={() => window.location.reload()}>
+                            <i className="fab fa-youtube text-red-600 text-2xl"></i>
+                            <span className="text-xl font-black italic tracking-tighter uppercase">NetBongo</span>
+                        </div>
+                        <div className="flex items-center gap-4 text-zinc-400">
+                            <i className="fas fa-search text-lg"></i>
+                            <div className="w-8 h-8 rounded-full bg-zinc-800 flex items-center justify-center border border-zinc-700 font-bold text-[10px]">PRO</div>
+                        </div>
+                    </header>
 
-      lines.forEach(line => {
-        line = line.trim();
-        if (line.startsWith('#EXTINF')) {
-          const title = line.split(',').pop();
-          const logoMatch = line.match(/tvg-logo="([^"]*)"/);
-          currentItem = { 
-            title: title || "Live Stream", 
-            thumb: logoMatch ? logoMatch[1] : m3u.thumb,
-            type: 'm3u8',
-            views: 'LIVE',
-            time: 'High Speed'
-          };
-        } else if (line.startsWith('http')) {
-          currentItem.url = line;
-          if (currentItem.title) {
-            items.push(currentItem);
-            currentItem = {};
-          }
-        }
-      });
-      setFeed(items.sort(() => 0.5 - Math.random()));
-    } catch (e) {
-      console.error("Playlist Load Error");
-    }
-    setLoading(false);
-  };
+                    {/* Content */}
+                    <main className="pt-14">
+                        {/* Categories */}
+                        <div className="sticky top-14 bg-black z-[90] overflow-x-auto no-scrollbar flex items-center gap-3 px-4 py-3 border-b border-zinc-900">
+                            <button 
+                                className={`whitespace-nowrap px-4 py-1.5 rounded-lg text-xs font-bold ${activeTab === 'all' ? 'bg-white text-black' : 'bg-zinc-800 text-zinc-400'}`}
+                                onClick={() => { setActiveTab('all'); setFeed(allVideos.sort(() => 0.5 - Math.random())); }}
+                            >সবগুলো</button>
+                            {playlists.map((pl, i) => (
+                                <button key={i} className={`whitespace-nowrap px-4 py-1.5 rounded-lg text-xs font-bold ${activeTab === pl.title ? 'bg-white text-black' : 'bg-zinc-800 text-zinc-400'}`} onClick={() => parseM3U(pl)}>{pl.title}</button>
+                            ))}
+                        </div>
 
-  // --- PLAYER ACTIONS ---
-  const launchPlayer = (video) => {
-    setCurrentVideo(video);
-    setPlayerState('full');
-    injectNativeAd();
-    
-    // Initialize DPlayer after a short delay for DOM rendering
-    setTimeout(() => {
-      if (dpRef.current) dpRef.current.destroy();
-      
-      const isHLS = video.url.includes('.m3u8') || video.type === 'm3u8';
-      
-      dpRef.current = new window.DPlayer({
-        container: document.getElementById('dplayer-node'),
-        autoplay: true,
-        video: {
-          url: video.url,
-          type: isHLS ? 'hls' : 'auto'
-        },
-        theme: '#ff0000',
-        playbackSpeed: [0.5, 0.75, 1, 1.25, 1.5, 2]
-      });
+                        {/* Grid */}
+                        <div className="p-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {loading ? (
+                                <div className="col-span-full py-20 flex justify-center"><i className="fas fa-spinner fa-spin text-red-600 text-3xl"></i></div>
+                            ) : (
+                                feed.map((v, i) => (
+                                    <React.Fragment key={i}>
+                                        <div className="cursor-pointer group" onClick={() => launchPlayer(v)}>
+                                            <div className="relative aspect-video rounded-xl overflow-hidden bg-zinc-900 shadow-lg">
+                                                <img src={v.thumb} className="w-full h-full object-cover group-hover:scale-105 transition duration-500 opacity-90" />
+                                                <div className="absolute bottom-2 right-2 bg-black/80 px-1.5 py-0.5 rounded text-[10px] font-bold border border-white/10">HD</div>
+                                            </div>
+                                            <div className="flex gap-3 mt-3">
+                                                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-zinc-700 to-black border border-zinc-800 flex-shrink-0" />
+                                                <div>
+                                                    <h3 className="text-sm font-bold text-zinc-100 line-clamp-2 leading-tight">{v.title}</h3>
+                                                    <p className="text-[11px] text-zinc-500 mt-1">{v.meta || 'NetBongo Stream'}</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        {/* UNIT 3: FEED BANNER EVERY 6 VIDEOS */}
+                                        {(i+1) % 6 === 0 && (
+                                            <div className="col-span-full py-4 border-y border-zinc-900 flex flex-col items-center">
+                                                <iframe srcdoc={`<body style='margin:0;display:flex;justify-content:center;background:#000;'><script>atOptions={'key':'1dc33aa030c9bbdf514894ff851','format':'iframe','height':250,'width':300,'params':{}};</script><script src='https://momrollback.com/1dc33aa030c9bbdf514894ff851/invoke.js'></script></body>`} width="300" height="250" frameBorder="0" />
+                                            </div>
+                                        )}
+                                    </React.Fragment>
+                                ))
+                            )}
+                        </div>
 
-      dpRef.current.on('ended', () => {
-          const next = allVideos[Math.floor(Math.random()*allVideos.length)];
-          launchPlayer(next);
-      });
-    }, 100);
-  };
+                        {/* UNIT 5: SMARTLINK BUTTON */}
+                        <div className="text-center py-10">
+                            <button onClick={() => window.open(SMARTLINK, '_blank')} className="bg-white text-black px-10 py-3 rounded-full font-black text-sm active:scale-95 transition">আরো ভিডিও দেখুন</button>
+                        </div>
+                    </main>
 
-  const closePlayer = () => {
-    if (dpRef.current) dpRef.current.destroy();
-    setPlayerState('closed');
-    setCurrentVideo(null);
-  };
+                    {/* PLAYER LAYER */}
+                    {playerState !== 'closed' && (
+                        <div className={`fixed z-[1000] bg-black transition-all duration-500 shadow-2xl overflow-hidden ${playerState === 'full' ? 'inset-0 flex flex-col' : 'bottom-20 right-4 w-44 h-28 rounded-lg border border-zinc-700'}`}>
+                            <div className={`relative bg-black ${playerState === 'full' ? 'aspect-video' : 'w-full h-full'}`}>
+                                <div id="dplayer-node" className="w-full h-full" />
+                                <div className="absolute top-2 left-2 z-[2000] flex gap-2">
+                                    <button onClick={() => setPlayerState(playerState === 'full' ? 'mini' : 'full')} className="bg-black/40 p-2 rounded-full backdrop-blur-md border border-white/10">
+                                        <i className={`fas ${playerState === 'full' ? 'fa-chevron-down' : 'fa-maximize'}`}></i>
+                                    </button>
+                                </div>
+                                {playerState === 'mini' && <button onClick={closePlayer} className="absolute top-2 right-2 z-[2000] bg-red-600/80 p-1.5 rounded-full"><i className="fas fa-times text-[10px]"></i></button>}
+                            </div>
+                            
+                            {playerState === 'full' && (
+                                <div className="flex-1 overflow-y-auto p-4 bg-black">
+                                    <h2 className="text-xl font-bold line-clamp-2">{currentVideo?.title}</h2>
+                                    <div className="flex items-center justify-between mt-4 pb-4 border-b border-zinc-900">
+                                        <div className="flex gap-3 items-center">
+                                            <div className="w-10 h-10 rounded-full bg-red-700 flex items-center justify-center font-bold text-xs italic shadow-lg">NB</div>
+                                            <div><p className="font-bold text-sm">NetBongo Official</p><p className="text-[10px] text-zinc-500 uppercase font-black">Verified</p></div>
+                                        </div>
+                                        <button className="bg-white text-black px-5 py-1.5 rounded-full text-xs font-bold">Subscribe</button>
+                                    </div>
+                                    {/* UNIT 4: NATIVE AD */}
+                                    <div id="nativeAdPlace" className="w-full my-6 min-h-[80px] bg-zinc-900/30 rounded-lg flex justify-center items-center" />
+                                    <h3 className="text-xs font-black text-zinc-500 uppercase tracking-widest mb-5">সংশ্লিষ্ট ভিডিও</h3>
+                                    <div className="space-y-4 pb-20">
+                                        {allVideos.filter(v => v.url !== currentVideo?.url).sort(() => 0.5 - Math.random()).slice(0, 10).map((v, i) => (
+                                            <div key={i} className="flex gap-3 active:bg-zinc-900 p-1 rounded-lg transition" onClick={() => launchPlayer(v)}>
+                                                <img src={v.thumb} className="w-36 h-20 object-cover rounded-lg bg-zinc-900" />
+                                                <div className="flex-1"><p className="text-sm font-bold line-clamp-2">{v.t || v.title}</p></div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    )}
 
-  const toggleMini = () => {
-    if (playerState === 'full') setPlayerState('mini');
-    else setPlayerState('full');
-  };
-
-  // Ad Injectors
-  const injectNativeAd = () => {
-    const el = document.getElementById('nativeAdPlace');
-    if (el) {
-      el.innerHTML = `<div id="container-3849795d04c7beaa7bfc1d4d0fa4fb4b"></div>`;
-      const script = document.createElement('script');
-      script.async = true;
-      script.dataset.cfasync = "false";
-      script.src = "https://momrollback.com/3849795d04c7beaa7bfc1d4d0fa4fb4b/invoke.js";
-      el.appendChild(script);
-    }
-  };
-
-  // UI Components
-  const VideoCard = ({ v }) => (
-    <div 
-      className="cursor-pointer mb-6 group animate-in fade-in duration-500"
-      onClick={() => launchPlayer(v)}
-    >
-      <div className="relative aspect-video rounded-xl overflow-hidden bg-zinc-900 border border-zinc-800">
-        <img src={v.thumb} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 opacity-90" alt="" />
-        <div className="absolute bottom-2 right-2 bg-black/80 px-1.5 py-0.5 rounded text-[10px] font-bold border border-white/10">
-          {v.views === 'LIVE' ? <span className="text-red-500">LIVE</span> : '10:00'}
-        </div>
-      </div>
-      <div className="flex gap-3 mt-3 px-1">
-        <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-zinc-700 to-zinc-900 border border-zinc-800 flex-shrink-0" />
-        <div className="flex-1 overflow-hidden">
-          <h3 className="text-sm font-semibold text-zinc-100 line-clamp-2 leading-tight">{v.title}</h3>
-          <p className="text-[11px] text-zinc-500 mt-1 font-medium">{v.views} • {v.time}</p>
-        </div>
-      </div>
-    </div>
-  );
-
-  return (
-    <div className="bg-black min-h-screen text-white select-none">
-      {/* 2. SOCIAL BAR & POPUNDER (Implicitly via script in HTML but handling triggers here if needed) */}
-      
-      {/* HEADER */}
-      <header className="fixed top-0 w-full h-14 bg-black/90 backdrop-blur-xl border-b border-zinc-800 flex items-center justify-between px-4 z-[100]">
-        <div className="flex items-center gap-2" onClick={() => window.location.reload()}>
-          <div className="bg-red-600 p-1.5 rounded-lg">
-            <Play size={18} fill="white" className="text-white" />
-          </div>
-          <span className="text-xl font-black italic tracking-tighter uppercase">NetBongo</span>
-        </div>
-        <div className="flex items-center gap-5 text-zinc-400">
-          <Search size={22} className="cursor-pointer hover:text-white" onClick={() => setSearchOpen(true)} />
-          <div className="w-8 h-8 rounded-full bg-zinc-800 flex items-center justify-center border border-zinc-700 font-bold text-xs">PRO</div>
-        </div>
-      </header>
-
-      {/* SEARCH MODAL */}
-      {searchOpen && (
-        <div className="fixed inset-0 bg-black z-[1000] p-4 flex flex-col">
-          <div className="flex items-center gap-4">
-            <X size={24} onClick={() => setSearchOpen(false)} />
-            <input 
-              type="text" 
-              className="bg-zinc-900 w-full p-3 rounded-full outline-none text-sm border border-zinc-800" 
-              placeholder="ভিডিও খুঁজুন..." 
-              autoFocus
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-          </div>
-          <div className="mt-6 space-y-4">
-            {allVideos.filter(v => v.title.toLowerCase().includes(searchQuery.toLowerCase())).slice(0, 10).map((v, i) => (
-              <div key={i} className="flex gap-3 items-center" onClick={() => { launchPlayer(v); setSearchOpen(false); }}>
-                <img src={v.thumb} className="w-20 h-12 object-cover rounded bg-zinc-900" alt="" />
-                <p className="text-sm font-medium line-clamp-1">{v.title}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* CONTENT AREA */}
-      <main className="pt-14 pb-20">
-        {/* PLAYLIST CHIPS */}
-        <div className="sticky top-14 bg-black/95 z-[90] overflow-x-auto no-scrollbar flex items-center gap-3 px-4 py-3 border-b border-zinc-900">
-          <button 
-            className={`chip-btn whitespace-nowrap px-4 py-1.5 rounded-lg text-xs font-bold transition-all ${activeTab === 'all' ? 'bg-white text-black' : 'bg-zinc-800 text-zinc-400 border border-zinc-700'}`}
-            onClick={() => { setActiveTab('all'); setFeed(allVideos.sort(() => 0.5 - Math.random())); }}
-          >
-            সবগুলো
-          </button>
-          {playlists.map((pl, idx) => (
-            <button 
-              key={idx}
-              className={`chip-btn whitespace-nowrap px-4 py-1.5 rounded-lg text-xs font-bold transition-all ${activeTab === pl.title ? 'bg-white text-black' : 'bg-zinc-800 text-zinc-400 border border-zinc-700'}`}
-              onClick={() => handlePlaylistSelect(pl)}
-            >
-              {pl.title}
-            </button>
-          ))}
-        </div>
-
-        {/* FEED GRID */}
-        <div className="p-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6">
-          {loading ? (
-             <div className="col-span-full py-20 flex justify-center"><div className="w-10 h-10 border-4 border-red-600 border-t-transparent rounded-full animate-spin" /></div>
-          ) : (
-            feed.map((video, index) => (
-              <React.Fragment key={index}>
-                <VideoCard v={video} />
-                {/* 3. FEED BANNER EVERY 6 VIDEOS */}
-                {(index + 1) % 6 === 0 && (
-                  <div className="col-span-full mb-6 h-[280px] flex items-center justify-center bg-zinc-900/30 rounded-xl overflow-hidden border border-zinc-800">
-                    <iframe srcdoc={`<body style='margin:0;display:flex;justify-content:center;background:#000;'><script>atOptions={'key':'1dc33aa030c9bbdf514894ff851','format':'iframe','height':250,'width':300,'params':{}};</script><script src='https://momrollback.com/1dc33aa030c9bbdf514894ff851/invoke.js'></script></body>`} width="300" height="250" frameBorder="0" />
-                  </div>
-                )}
-              </React.Fragment>
-            ))
-          )}
-        </div>
-
-        {/* LOAD MORE / SMARTLINK */}
-        <div className="text-center py-10">
-          <button 
-            onClick={() => window.open(SMARTLINK, '_blank')}
-            className="bg-white text-black px-10 py-3 rounded-full font-black text-sm active:scale-95 transition-transform"
-          >
-            আরো ভিডিও দেখুন
-          </button>
-        </div>
-      </main>
-
-      {/* PLAYER MODAL LAYER */}
-      {playerState !== 'closed' && (
-        <div className={`fixed z-[1000] bg-black transition-all duration-500 shadow-2xl overflow-hidden ${
-          playerState === 'full' 
-          ? 'inset-0 flex flex-col' 
-          : 'bottom-20 right-4 w-40 h-24 rounded-lg border border-zinc-700'
-        }`}>
-          {/* Player Shell */}
-          <div className={`relative bg-black flex-shrink-0 ${playerState === 'full' ? 'aspect-video' : 'w-full h-full'}`} id="video-box">
-             <div id="dplayer-node" className="w-full h-full" />
-             
-             {/* Player Overlay Controls (Maximize / Minimize) */}
-             <div className="absolute top-2 left-2 z-[2000] flex gap-2">
-                <button 
-                  onClick={toggleMini} 
-                  className="bg-black/50 p-2 rounded-full backdrop-blur-md border border-white/10"
-                >
-                  {playerState === 'full' ? <ChevronDown size={20} /> : <Maximize2 size={16} />}
-                </button>
-             </div>
-             {playerState === 'mini' && (
-               <button 
-                onClick={closePlayer} 
-                className="absolute top-2 right-2 z-[2000] bg-red-600/80 p-1 rounded-full"
-               >
-                <X size={12} />
-               </button>
-             )}
-          </div>
-
-          {/* Details & Suggestions (Visible in Full Only) */}
-          {playerState === 'full' && (
-            <div className="flex-1 overflow-y-auto p-4 bg-black">
-              <h2 className="text-xl font-extrabold line-clamp-2 leading-tight">{currentVideo?.title}</h2>
-              <div className="flex items-center justify-between mt-4 pb-4 border-b border-zinc-900">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-red-700 flex items-center justify-center font-bold text-xs italic">NB</div>
-                  <div>
-                    <p className="font-bold text-sm">NetBongo Official</p>
-                    <p className="text-[10px] text-zinc-500 font-black uppercase">Verified Streaming</p>
-                  </div>
+                    {/* NAV */}
+                    <nav className="fixed bottom-0 w-full h-[65px] bg-black border-t border-zinc-800 flex justify-around items-center z-[500] backdrop-blur-2xl">
+                        <div className="flex flex-col items-center gap-1 text-white" onClick={() => setActiveTab('all')}><i className="fas fa-home text-lg"></i><span className="text-[10px] font-bold uppercase tracking-tighter">হোম</span></div>
+                        <div className="flex flex-col items-center gap-1 text-zinc-500"><i className="fas fa-bolt text-lg"></i><span className="text-[10px] font-bold uppercase tracking-tighter">শর্টস</span></div>
+                        <div className="flex flex-col items-center gap-1 text-yellow-500" onClick={() => window.open(SMARTLINK, '_blank')}><i className="fas fa-crown text-2xl"></i><span className="text-[10px] font-bold uppercase tracking-tighter">Premium</span></div>
+                        <div className="flex flex-col items-center gap-1 text-zinc-500"><i className="fas fa-heart text-lg"></i><span className="text-[10px] font-bold uppercase tracking-tighter">সেভ</span></div>
+                        <div className="flex flex-col items-center gap-1 text-zinc-500"><i className="fas fa-play-circle text-lg"></i><span className="text-[10px] font-bold uppercase tracking-tighter">লাইব্রেরি</span></div>
+                    </nav>
                 </div>
-                <button className="bg-white text-black px-5 py-2 rounded-full text-xs font-bold">Subscribe</button>
-              </div>
+            );
+        }
 
-              {/* 4. NATIVE AD */}
-              <div id="nativeAdPlace" className="w-full my-6 min-h-[80px] bg-zinc-900/50 rounded-lg" />
-
-              {/* SUGGESTIONS (RANDOMIZED) */}
-              <h3 className="text-xs font-black text-zinc-500 uppercase tracking-widest mb-4 italic">আপনার জন্য প্রস্তাবিত</h3>
-              <div className="space-y-4 pb-20">
-                {allVideos.filter(v => v.url !== currentVideo?.url).sort(() => 0.5 - Math.random()).slice(0, 10).map((v, i) => (
-                  <div key={i} className="flex gap-3" onClick={() => launchPlayer(v)}>
-                    <div className="w-40 h-24 bg-zinc-900 rounded-lg overflow-hidden flex-shrink-0 border border-zinc-800">
-                      <img src={v.thumb} className="w-full h-full object-cover" alt="" />
-                    </div>
-                    <div className="flex-1">
-                      <p className="text-sm font-bold line-clamp-2 leading-tight">{v.title}</p>
-                      <p className="text-[10px] text-zinc-500 mt-2 font-bold">{v.views} views</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* BOTTOM NAVIGATION */}
-      <nav className="fixed bottom-0 w-full h-[65px] bg-black/95 border-t border-zinc-800 flex justify-around items-center z-[500] backdrop-blur-2xl">
-        <div className="flex flex-col items-center gap-1 text-white cursor-pointer" onClick={() => setActiveTab('all')}>
-          <Home size={22} fill={activeTab === 'all' ? "white" : "none"} />
-          <span className="text-[10px] font-black uppercase tracking-tighter">হোম</span>
-        </div>
-        <div className="flex flex-col items-center gap-1 text-zinc-500 cursor-pointer">
-          <Layers size={22} />
-          <span className="text-[10px] font-black uppercase tracking-tighter">শর্টস</span>
-        </div>
-        <div className="flex flex-col items-center gap-1 text-zinc-500 cursor-pointer" onClick={() => window.open(SMARTLINK, '_blank')}>
-          <Crown size={28} className="text-yellow-500" />
-          <span className="text-[10px] font-black uppercase tracking-tighter text-yellow-500">Premium</span>
-        </div>
-        <div className="flex flex-col items-center gap-1 text-zinc-500 cursor-pointer">
-          <Heart size={22} />
-          <span className="text-[10px] font-black uppercase tracking-tighter">সংরক্ষিত</span>
-        </div>
-        <div className="flex flex-col items-center gap-1 text-zinc-500 cursor-pointer">
-          <Play size={22} />
-          <span className="text-[10px] font-black uppercase tracking-tighter">লাইব্রেরি</span>
-        </div>
-      </nav>
-
-      {/* LOAD EXTERNAL SCRIPTS VIA DOM */}
-      {!window.DPlayer && (
-        <>
-          <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/dplayer/dist/DPlayer.min.css" />
-          <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
-          <script src="https://cdn.jsdelivr.net/npm/dplayer/dist/DPlayer.min.js"></script>
-        </>
-      )}
-    </div>
-  );
-};
-
-export default App;
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
 
