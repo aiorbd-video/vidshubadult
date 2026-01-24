@@ -3,13 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>NetBongo - Premium Tube</title>
-    
-    <!-- Dynamic SEO Meta -->
-    <meta name="description" content="Watch best viral videos and playlists.">
-    <meta property="og:title" content="NetBongo Video Player">
-    <meta property="og:type" content="website">
-    <meta property="og:description" content="Click to watch this video securely.">
+    <title>NetBongo - Premium Hub</title>
+    <meta name="theme-color" content="#000000">
+    <meta name="description" content="Premium Viral Videos & Playlists">
     
     <!-- Libraries -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
@@ -17,130 +13,157 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/hls.js/1.5.8/hls.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-    <!-- Styles -->
     <style>
         :root {
-            --primary: #ff9900;
-            --bg: #0f0f0f;
-            --surface: #1e1e1e;
+            --primary: #ff9000; /* PH Orange */
+            --bg: #000000;
+            --surface: #1b1b1b;
             --text: #ffffff;
-            --gray: #aaaaaa;
+            --gray: #6f6f6f;
         }
 
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
+        
         body {
             margin: 0; padding: 0;
             background-color: var(--bg);
             color: var(--text);
-            font-family: Arial, sans-serif;
+            font-family: Arial, Helvetica, sans-serif;
             overflow-x: hidden;
-            -webkit-tap-highlight-color: transparent;
+            padding-bottom: 60px;
         }
 
         /* 18+ Modal */
         #entry-modal {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: #000; z-index: 10000;
-            display: flex; align-items: center; justify-content: center; flex-direction: column;
+            background: #000; z-index: 99999;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
             text-align: center;
         }
         .entry-box {
-            border: 2px solid var(--primary); padding: 30px; border-radius: 10px;
-            background: #111; max-width: 90%;
+            border: 2px solid var(--primary); padding: 30px; border-radius: 5px;
+            background: #111; max-width: 90%; width: 320px;
         }
         .entry-btn {
             background: var(--primary); color: black; border: none;
-            padding: 15px 40px; font-size: 18px; font-weight: bold;
-            margin-top: 20px; cursor: pointer; border-radius: 5px;
+            padding: 12px 30px; font-size: 16px; font-weight: bold;
+            margin-top: 20px; cursor: pointer; border-radius: 3px;
+            text-transform: uppercase;
         }
 
-        /* Header & Nav */
+        /* Header */
         header {
-            position: sticky; top: 0; z-index: 100;
-            background: var(--surface); border-bottom: 2px solid var(--primary);
-            padding: 10px 15px; display: flex; align-items: center; justify-content: space-between;
+            background: #000; padding: 12px 15px;
+            display: flex; align-items: center; justify-content: space-between;
+            border-bottom: 1px solid #333; position: sticky; top: 0; z-index: 100;
         }
-        .logo { font-size: 22px; font-weight: bold; color: white; cursor: pointer; }
-        .logo span { color: var(--primary); }
-        
-        .nav-tabs {
-            display: flex; gap: 15px; margin-top: 5px;
-            overflow-x: auto; white-space: nowrap; padding-bottom: 5px;
-        }
-        .tab {
-            padding: 5px 12px; background: #333; border-radius: 15px;
-            font-size: 13px; cursor: pointer; color: #ccc; transition: 0.2s;
-        }
-        .tab.active { background: var(--primary); color: black; font-weight: bold; }
+        .logo { font-size: 24px; font-weight: bold; color: white; cursor: pointer; letter-spacing: -1px; }
+        .logo span { background: var(--primary); color: black; padding: 2px 5px; border-radius: 3px; margin-left: 2px; }
 
-        /* Container */
+        /* Sticky Tabs */
+        .sticky-nav {
+            background: #000; padding: 10px 15px;
+            position: sticky; top: 54px; z-index: 90;
+            border-bottom: 1px solid #333;
+            display: flex; gap: 10px; overflow-x: auto;
+            scrollbar-width: none;
+        }
+        .cat-tab {
+            background: #333; color: #fff;
+            padding: 8px 18px; border-radius: 30px;
+            font-size: 14px; font-weight: bold; white-space: nowrap; cursor: pointer;
+            transition: 0.2s; border: 1px solid transparent;
+        }
+        .cat-tab.active { background: #000; color: var(--primary); border: 1px solid var(--primary); }
+
+        /* GRID SYSTEM (Mobile 1 Col, Desktop Multi) */
         .container { max-width: 1400px; margin: 0 auto; padding: 10px; }
-
-        /* Video Grid */
+        
         .video-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); /* Mobile friendly 2 col */
-            gap: 10px;
+            grid-template-columns: 1fr; /* Mobile: Single Column */
+            gap: 20px;
         }
-        @media (min-width: 768px) {
-            .video-grid { grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 15px; }
+        @media (min-width: 600px) {
+            .video-grid { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; }
+        }
+        @media (min-width: 900px) {
+            .video-grid { grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
         }
 
-        .card {
-            background: var(--surface); border-radius: 5px; overflow: hidden;
-            cursor: pointer; position: relative; transition: transform 0.2s;
-        }
-        .card:active { transform: scale(0.98); }
-        
-        .thumb {
+        .card { cursor: pointer; position: relative; background: #000; border-radius: 6px; overflow: hidden; }
+        .thumb-box {
             position: relative; width: 100%; padding-top: 56.25%; /* 16:9 */
-            background: #000;
+            background: #111; overflow: hidden;
         }
-        .thumb img {
+        .thumb {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             object-fit: cover;
         }
+
+        /* Playlist Badge Fixed */
+        .badge-pl {
+             position: absolute; bottom: 0; right: 0; 
+             background: rgba(255, 144, 0, 0.9); /* Orange background */
+             color: black;
+             padding: 4px 10px;
+             font-size: 11px; font-weight: 800;
+             display: flex; align-items: center; gap: 5px;
+             border-top-left-radius: 6px;
+             text-transform: uppercase;
+        }
+
         .duration {
             position: absolute; bottom: 5px; right: 5px;
             background: rgba(0,0,0,0.8); color: white;
-            padding: 2px 5px; font-size: 11px; border-radius: 3px;
+            padding: 2px 5px; font-size: 11px; border-radius: 2px; font-weight: bold;
         }
 
-        .info { padding: 8px; }
+        .info { padding: 10px 5px; }
         .title {
-            font-size: 14px; margin: 0; line-height: 1.3;
+            font-size: 15px; color: #fff; margin: 0;
             display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
-            overflow: hidden; color: #eee;
+            overflow: hidden; line-height: 1.4; font-weight: 500;
         }
-        .meta { font-size: 11px; color: var(--gray); margin-top: 5px; }
+        .meta { font-size: 12px; color: var(--gray); margin-top: 5px; display:flex; justify-content:space-between; }
 
-        /* Load More */
-        .load-more {
-            display: block; width: 100%; max-width: 300px;
-            margin: 20px auto; padding: 12px;
-            background: #333; color: white; border: none;
-            border-radius: 5px; cursor: pointer; font-size: 14px;
+        /* Player */
+        #player-view { display: none; }
+        .player-container {
+            width: 100%; aspect-ratio: 16/9; background: #000;
+            position: relative; z-index: 10; margin-bottom: 10px;
         }
-        .load-more:hover { background: #444; }
-
-        /* Player Page */
-        #player-section { display: none; }
-        .player-box { width: 100%; aspect-ratio: 16/9; background: black; margin-bottom: 15px; }
         .artplayer-app { width: 100%; height: 100%; }
+
+        .video-main-info { padding-bottom: 15px; border-bottom: 1px solid #333; }
+        .vid-h1 { font-size: 18px; color: #fff; margin: 0 0 10px 0; }
         
-        .playlist-drawer {
-            margin-top: 20px; background: var(--surface);
-            padding: 10px; border-radius: 5px; max-height: 400px; overflow-y: auto;
+        .actions { display: flex; gap: 10px; margin-top: 10px; }
+        .act-btn {
+            background: #333; color: white; border: none; padding: 10px 15px; flex: 1;
+            border-radius: 4px; font-weight: bold; font-size: 14px; cursor: pointer;
+            display: flex; align-items: center; justify-content: center; gap: 5px;
         }
-        .pl-item {
-            padding: 10px; border-bottom: 1px solid #333; cursor: pointer; display: flex; align-items: center;
+        .act-btn.dl { color: #28a745; }
+
+        /* Related Section */
+        .section-header { margin: 25px 0 15px 0; font-size: 18px; color: var(--text); border-left: 4px solid var(--primary); padding-left: 10px; font-weight: bold; }
+
+        /* Playlist Folder View */
+        #playlist-view { display: none; }
+        .pl-header { padding: 15px 0; border-bottom: 1px solid #333; margin-bottom: 15px; }
+        .pl-title { font-size: 22px; color: var(--primary); margin:0; }
+
+        /* Ads */
+        .ad-native { width: 100%; min-height: 80px; background: #111; margin: 10px 0; display:flex; justify-content:center; align-items:center; }
+        .ad-banner { margin: 20px auto; text-align: center; }
+        
+        .load-more {
+            display: block; width: 100%; padding: 15px;
+            background: #222; color: var(--primary);
+            border: 1px solid #333; text-align: center;
+            margin-top: 20px; font-weight: bold; cursor: pointer;
         }
-        .pl-item:hover { background: #333; }
-        .pl-item.active { color: var(--primary); }
-
-        /* Ads Areas */
-        .ad-native { width: 100%; min-height: 80px; background: #111; margin-bottom: 10px; display:flex; justify-content:center; align-items:center; }
-        .ad-banner { margin: 15px auto; text-align: center; }
-
     </style>
 </head>
 <body>
@@ -148,54 +171,74 @@
     <!-- 18+ Modal -->
     <div id="entry-modal">
         <div class="entry-box">
-            <h2 style="color:red; margin-top:0;">WARNING: 18+</h2>
-            <p>This site contains adult content.</p>
-            <button class="entry-btn" onclick="enterSite()">I AM 18+ ENTER</button>
+            <h1 style="color:var(--primary); margin:0 0 10px 0;">WARNING 18+</h1>
+            <p style="color:#ccc;">This site contains adult material.</p>
+            <button class="entry-btn" onclick="enterSite()">I am 18+ - Enter</button>
         </div>
     </div>
 
     <!-- Header -->
     <header>
         <div class="logo" onclick="goHome()">Net<span>Bongo</span></div>
-        <div class="nav-tabs">
-            <div class="tab active" onclick="filterTab('all', this)">All</div>
-            <div class="tab" onclick="filterTab('playlist', this)">Playlists</div>
-            <div class="tab" onclick="filterTab('trending', this)">Trending</div>
-        </div>
+        <div style="font-size:18px; color:white;"><i class="fas fa-search"></i></div>
     </header>
 
+    <!-- Sticky Tabs -->
+    <div id="sticky-nav" class="sticky-nav">
+        <div class="cat-tab active" onclick="filterData('all', this)">All Videos</div>
+        <div class="cat-tab" onclick="filterData('playlist', this)">Playlists</div>
+        <div class="cat-tab" onclick="filterData('trending', this)">Trending</div>
+    </div>
+
     <div class="container">
-        
-        <!-- Native Banner Ad (Top) -->
+
+        <!-- Native Ad -->
         <div class="ad-native">
+            <script async="async" data-cfasync="false" src="https://momrollback.com/b88712e5e1e497d39ecedaffd47492bc/invoke.js"></script>
             <div id="container-b88712e5e1e497d39ecedaffd47492bc"></div>
         </div>
 
-        <!-- Home Grid -->
-        <div id="home-section">
+        <!-- Home View -->
+        <div id="home-view">
             <div class="video-grid" id="grid"></div>
-            <button class="load-more" id="btn-load-more" onclick="loadMoreVideos()">Load More Videos</button>
+            <div class="load-more" id="btn-more" onclick="loadMore()">Show More Videos</div>
         </div>
 
-        <!-- Player Section -->
-        <div id="player-section">
-            <button onclick="goHome()" style="background:none; border:none; color:var(--primary); font-size:16px; margin-bottom:10px; cursor:pointer;">
+        <!-- Playlist View (Folder) -->
+        <div id="playlist-view">
+            <div style="margin-bottom: 10px; cursor: pointer; color: var(--gray); font-size: 13px;" onclick="goHome()">
                 <i class="fas fa-arrow-left"></i> Back to Home
-            </button>
-            
-            <div class="player-box">
+            </div>
+            <div class="pl-header">
+                <h2 class="pl-title" id="pl-title">Playlist</h2>
+                <span id="pl-count" style="color:#666; font-size:12px;">Loading...</span>
+            </div>
+            <div class="video-grid" id="pl-grid"></div>
+        </div>
+
+        <!-- Player View -->
+        <div id="player-view">
+            <div style="margin-bottom: 10px; cursor: pointer; color: var(--gray); font-size: 13px;" onclick="goBackLogic()">
+                <i class="fas fa-arrow-left"></i> <span id="back-text">Back</span>
+            </div>
+
+            <div class="player-container">
                 <div class="artplayer-app" id="artplayer"></div>
             </div>
 
-            <h2 id="video-title" style="font-size:18px; margin:0 0 10px 0;"></h2>
-            
-            <div style="display:flex; gap:10px; margin-bottom:15px;">
-                <button onclick="shareVideo()" style="background:var(--surface); color:white; border:1px solid #444; padding:8px 15px; border-radius:20px; cursor:pointer;">
-                    <i class="fas fa-share"></i> Share
-                </button>
-                <a href="https://momrollback.com/jnt0mwiv7?key=c244b66638c840b3570508593d8b468e" target="_blank" style="background:#28a745; color:white; padding:8px 15px; border-radius:20px; text-decoration:none; font-size:14px;">
-                    <i class="fas fa-download"></i> HD Download
-                </a>
+            <div class="video-main-info">
+                <h1 class="vid-h1" id="p-title">Loading...</h1>
+                <div class="meta" style="display:flex; justify-content:space-between;">
+                    <span><i class="fas fa-eye"></i> 1.2M Views</span>
+                    <span><i class="fas fa-thumbs-up"></i> 98%</span>
+                </div>
+                
+                <div class="actions">
+                    <button class="act-btn" onclick="shareVideo()"><i class="fas fa-share"></i> Share</button>
+                    <a href="https://momrollback.com/jnt0mwiv7?key=c244b66638c840b3570508593d8b468e" target="_blank" class="act-btn dl">
+                        <i class="fas fa-download"></i> Download
+                    </a>
+                </div>
             </div>
 
             <!-- 300x250 Ad -->
@@ -206,341 +249,351 @@
                 <script type="text/javascript" src="https://momrollback.com/efc3a9ebdeba69b64a361554582f3008/invoke.js"></script>
             </div>
 
-            <div id="playlist-ui" class="playlist-drawer" style="display:none;"></div>
+            <!-- Related Videos -->
+            <div class="section-header">Recommended For You</div>
+            <div class="video-grid" id="related-grid"></div>
         </div>
 
     </div>
 
-    <!-- SCRIPTS -->
     <script>
         // --- CONFIG ---
-        const SHEET_CSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTugOQXwLIGyVofFlvFLKN7E_PNemCkIDcdwB4dGcoP16gOnTcmJ2iSM5lr_YFVPts1Fbc5g5gkvE4S/pub?output=csv";
+        const CSV_LINK = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTugOQXwLIGyVofFlvFLKN7E_PNemCkIDcdwB4dGcoP16gOnTcmJ2iSM5lr_YFVPts1Fbc5g5gkvE4S/pub?output=csv";
+        const PROXY_API = "https://netbong.aiorbd.workers.dev/?url=";
         const IMG_PROXY = "https://img-allinone.netlify.app/.netlify/functions/proxy?url=";
-        const DATA_PROXY = "https://netbong.aiorbd.workers.dev/?url=";
-        
-        let allData = [];
-        let filteredData = [];
-        let currentPage = 1;
-        const perPage = 20;
+
+        let masterData = [];
+        let activeData = [];
+        let page = 1;
         let art = null;
         let hls = null;
+        let lastView = 'home'; 
 
         // --- INIT ---
         window.addEventListener('DOMContentLoaded', () => {
-            const isVerified = localStorage.getItem('nb_adult_verified');
-            if (isVerified) {
+            if(localStorage.getItem('nb_pro_v3')) {
                 document.getElementById('entry-modal').style.display = 'none';
-                loadAds();
-                initApp();
+                init();
             }
         });
 
         function enterSite() {
-            localStorage.setItem('nb_adult_verified', 'true');
+            localStorage.setItem('nb_pro_v3', 'true');
             document.getElementById('entry-modal').style.display = 'none';
-            
-            // Fix: Push state immediately to prevent "Back to Google"
-            history.pushState({ page: 'home' }, document.title, window.location.href);
-            
-            loadAds();
-            initApp();
+            // Inject Ads
+            let s1 = document.createElement('script'); s1.src = "https://momrollback.com/02/f8/86/02f886f4ac6dd52755b96f56e54b4d57.js"; document.body.appendChild(s1);
+            let s2 = document.createElement('script'); s2.src = "https://momrollback.com/dc/95/4d/dc954dbecf4b21d37cedb37de585cf99.js"; document.body.appendChild(s2);
+            init();
         }
 
-        function loadAds() {
-            // Inject Ads dynamically AFTER user interaction to respect UX
-            const s1 = document.createElement('script');
-            s1.src = "https://momrollback.com/02/f8/86/02f886f4ac6dd52755b96f56e54b4d57.js"; // Popunder
-            document.body.appendChild(s1);
-
-            const s2 = document.createElement('script');
-            s2.src = "https://momrollback.com/b88712e5e1e497d39ecedaffd47492bc/invoke.js"; // Native
-            s2.setAttribute('data-cfasync', 'false');
-            document.body.appendChild(s2);
-
-            const s3 = document.createElement('script');
-            s3.src = "https://momrollback.com/dc/95/4d/dc954dbecf4b21d37cedb37de585cf99.js"; // Socialbar
-            document.body.appendChild(s3);
-        }
-
-        async function initApp() {
+        async function init() {
             try {
-                // Try fetching CSV direct, then proxy
-                let csvText = "";
+                let txt = "";
                 try {
-                    const r = await fetch(SHEET_CSV);
-                    if (!r.ok) throw new Error();
-                    csvText = await r.text();
+                    let r = await fetch(CSV_LINK);
+                    if(!r.ok) throw new Error();
+                    txt = await r.text();
                 } catch {
-                    const r = await fetch(DATA_PROXY + encodeURIComponent(SHEET_CSV));
-                    csvText = await r.text();
+                    let r = await fetch(PROXY_API + encodeURIComponent(CSV_LINK));
+                    txt = await r.text();
                 }
 
-                const parsed = Papa.parse(csvText, { header: true, skipEmptyLines: true });
-                allData = parsed.data.filter(x => x.url && x.title).sort(() => Math.random() - 0.5);
+                let p = Papa.parse(txt, {header:true, skipEmptyLines:true});
+                masterData = p.data.filter(x => x.url && x.title).sort(() => Math.random() - 0.5);
                 
-                // Check for Shared Link (Encoded)
-                const params = new URLSearchParams(window.location.search);
-                const encLink = params.get('v');
-                
-                if (encLink) {
+                // Deep Link Check
+                let q = new URLSearchParams(window.location.search);
+                let encV = q.get('v');
+                let encP = q.get('p');
+
+                if(encV) {
                     try {
-                        const decodedUrl = atob(encLink); // Decode base64
-                        const videoItem = allData.find(d => d.url === decodedUrl) || { url: decodedUrl, title: "Shared Video", type: 'auto' };
-                        openPlayer(videoItem);
-                    } catch (e) {
-                        renderGrid('all');
-                    }
+                        let url = atob(encV);
+                        let item = masterData.find(x => x.url === url) || {url:url, title:'Video', type:'mp4'};
+                        loadPlayer(item);
+                    } catch { filterData('all'); }
+                } else if(encP) {
+                     try {
+                        let url = atob(encP);
+                        let item = masterData.find(x => x.url === url) || {url:url, title:'Playlist', type:'m3u'};
+                        openPlaylist(item);
+                    } catch { filterData('all'); }
                 } else {
-                    renderGrid('all');
+                    filterData('all');
                 }
 
-            } catch (err) {
-                console.error("Data Load Error", err);
-            }
+            } catch(e) { console.log(e); }
         }
 
-        // --- GRID & TABS ---
-        function filterTab(type, el) {
-            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-            if(el) el.classList.add('active');
-            renderGrid(type);
+        // --- HELPER: DETECT PLAYLIST VS VIDEO ---
+        function isPlaylistType(item) {
+            // STRICT LOGIC:
+            // 1. If URL ends with .m3u8 -> IT IS A VIDEO (Stream)
+            // 2. If URL ends with .m3u  -> IT IS A PLAYLIST (Folder)
+            // 3. If Type column says 'playlist' or 'm3u' (but not m3u8) -> Playlist
+            
+            const url = item.url.toLowerCase();
+            const type = (item.type || '').toLowerCase();
+
+            if (url.includes('.m3u8')) return false; // Stream
+            if (url.endsWith('.m3u')) return true;   // Playlist File
+            if (type.includes('m3u') && !type.includes('m3u8')) return true;
+
+            return false;
         }
 
-        function renderGrid(filterType) {
-            document.getElementById('home-section').style.display = 'block';
-            document.getElementById('player-section').style.display = 'none';
-            if(art) art.pause();
-
-            currentPage = 1;
-            const grid = document.getElementById('grid');
-            grid.innerHTML = '';
-
-            if (filterType === 'all') {
-                filteredData = allData;
-            } else if (filterType === 'playlist') {
-                filteredData = allData.filter(d => (d.type && d.type.includes('m3u')) || d.url.includes('.m3u'));
-            } else {
-                // Trending mock (random slice)
-                filteredData = [...allData].sort(() => 0.5 - Math.random());
+        // --- HOME LOGIC ---
+        function filterData(cat, el) {
+            if(el) {
+                document.querySelectorAll('.cat-tab').forEach(x => x.classList.remove('active'));
+                el.classList.add('active');
             }
 
-            appendItems();
+            if(cat === 'all') activeData = masterData;
+            else if(cat === 'playlist') activeData = masterData.filter(x => isPlaylistType(x));
+            else if(cat === 'trending') activeData = [...masterData].sort(() => Math.random() - 0.5);
+            else if(cat === 'hd') activeData = masterData.filter(x => !isPlaylistType(x));
+
+            page = 1;
+            document.getElementById('grid').innerHTML = '';
+            switchView('home');
+            loadMore();
         }
 
-        function loadMoreVideos() {
-            currentPage++;
-            appendItems();
-        }
+        function loadMore() {
+            let start = (page-1)*20;
+            let end = start + 20;
+            let items = activeData.slice(start, end);
 
-        function appendItems() {
-            const grid = document.getElementById('grid');
-            const start = (currentPage - 1) * perPage;
-            const end = start + perPage;
-            const chunk = filteredData.slice(start, end);
-
-            if (chunk.length === 0) {
-                document.getElementById('btn-load-more').style.display = 'none';
+            if(items.length === 0) {
+                document.getElementById('btn-more').style.display = 'none';
                 return;
-            } else {
-                document.getElementById('btn-load-more').style.display = 'block';
-            }
+            } else document.getElementById('btn-more').style.display = 'block';
 
-            chunk.forEach(vid => {
-                const card = document.createElement('div');
-                card.className = 'card';
+            let grid = document.getElementById('grid');
+            items.forEach(v => {
+                let div = document.createElement('div');
+                div.className = 'card';
                 
-                // Image Proxy Logic
-                const rawImg = vid.image || 'https://via.placeholder.com/300x169?text=No+Preview';
-                const isPlaylist = (vid.type && vid.type.includes('m3u')) || vid.url.includes('m3u8');
+                let isPL = isPlaylistType(v);
+                let img = v.image || 'https://via.placeholder.com/320x180/111/444?text=NetBongo';
+                let dur = Math.floor(Math.random()*20)+5 + ":" + Math.floor(Math.random()*59).toString().padStart(2,'0');
                 
-                // Random duration generator for "tube style"
-                const mins = Math.floor(Math.random() * 20) + 5;
-                const secs = Math.floor(Math.random() * 59);
-                const duration = isPlaylist && !vid.url.endsWith('.m3u8') ? "PLAYLIST" : `${mins}:${secs < 10 ? '0'+secs : secs}`;
+                // Random count for badge
+                let count = Math.floor(Math.random()*20)+5;
 
-                card.innerHTML = `
-                    <div class="thumb">
-                        <img src="${rawImg}" loading="lazy" 
-                             onerror="this.onerror=null; this.src='${IMG_PROXY + encodeURIComponent(rawImg)}'">
-                        <div class="duration" style="${duration === 'PLAYLIST' ? 'background:red;' : ''}">${duration}</div>
+                div.innerHTML = `
+                    <div class="thumb-box">
+                        <img class="thumb" src="${img}" loading="lazy" onerror="this.src='${IMG_PROXY+encodeURIComponent(img)}'">
+                        ${isPL ? `<div class="badge-pl"><i class="fas fa-folder-open"></i> Playlist</div>` : `<span class="duration">${dur}</span>`}
                     </div>
                     <div class="info">
-                        <h3 class="title">${vid.title}</h3>
-                        <div class="meta">${Math.floor(Math.random()*900)}K views • 2 hours ago</div>
+                        <h3 class="title">${v.title}</h3>
+                        <div class="meta">
+                            <span>${Math.floor(Math.random()*900)}K views</span>
+                            <span>98%</span>
+                        </div>
                     </div>
                 `;
-                card.onclick = () => openPlayer(vid);
-                grid.appendChild(card);
+                div.onclick = () => {
+                    if(isPL) openPlaylist(v);
+                    else loadPlayer(v);
+                };
+                grid.appendChild(div);
             });
+            page++;
+        }
+
+        // --- PLAYLIST LOGIC (Folder View) ---
+        async function openPlaylist(v) {
+            switchView('playlist');
+            window.scrollTo(0,0);
+            
+            let safe = btoa(v.url);
+            history.pushState({v:'playlist', url:v.url}, v.title, `?p=${safe}`);
+            document.title = v.title + " - Playlist";
+
+            document.getElementById('pl-title').innerText = v.title;
+            document.getElementById('pl-count').innerText = "Fetching episodes...";
+            document.getElementById('pl-grid').innerHTML = '<div style="color:white; padding:20px; text-align:center;">Loading Playlist...</div>';
+
+            try {
+                let txt = "";
+                try {
+                    let r = await fetch(v.url); // Try Direct
+                    if(!r.ok) throw new Error();
+                    txt = await r.text();
+                } catch {
+                    let r = await fetch(PROXY_API + encodeURIComponent(v.url)); // Use Proxy
+                    txt = await r.text();
+                }
+
+                // PARSE M3U TEXT
+                let lines = txt.split('\n');
+                let list = [];
+                let t = "Episode";
+                lines.forEach(l => {
+                    l = l.trim();
+                    if(l.startsWith('#EXTINF:')) t = l.split(',')[1] || "Episode";
+                    else if(l && !l.startsWith('#')) {
+                        list.push({title:t, url:l, image:v.image});
+                        t = "Episode";
+                    }
+                });
+
+                document.getElementById('pl-count').innerText = list.length + " Videos";
+                let grid = document.getElementById('pl-grid');
+                grid.innerHTML = '';
+                
+                if(list.length === 0) {
+                     grid.innerHTML = '<div style="color:red; padding:20px; text-align:center;">Empty Playlist or Parse Error</div>';
+                     return;
+                }
+
+                list.forEach((item, idx) => {
+                    let div = document.createElement('div');
+                    div.className = 'card';
+                    let img = item.image || `https://via.placeholder.com/320x180/333/orange?text=EP+${idx+1}`;
+                    
+                    div.innerHTML = `
+                        <div class="thumb-box">
+                            <img class="thumb" src="${img}" loading="lazy">
+                            <span class="duration">EP ${idx+1}</span>
+                        </div>
+                        <div class="info"><h3 class="title">${item.title}</h3></div>
+                    `;
+                    div.onclick = () => loadPlayer(item, true);
+                    grid.appendChild(div);
+                });
+
+            } catch(e) {
+                document.getElementById('pl-grid').innerHTML = "Failed to load playlist. Check URL or CORS.";
+            }
         }
 
         // --- PLAYER LOGIC ---
-        function openPlayer(video) {
-            document.getElementById('home-section').style.display = 'none';
-            document.getElementById('player-section').style.display = 'block';
-            document.getElementById('video-title').innerText = video.title;
-
-            // Encoded URL in address bar (Anti-hack basic)
-            const safeUrl = btoa(video.url);
-            const newPath = `?v=${safeUrl}`;
-            history.pushState({ page: 'player' }, video.title, newPath);
-
+        function loadPlayer(v, fromPlaylist = false) {
             window.scrollTo(0,0);
+            switchView('player');
+            lastView = fromPlaylist ? 'playlist' : 'home';
+            document.getElementById('back-text').innerText = fromPlaylist ? "Back to Playlist" : "Back to Home";
 
-            // Playlist Logic
-            const isM3U = (video.type && video.type.includes('m3u') && !video.type.includes('m3u8')) || (video.url.endsWith('.m3u'));
+            let safe = btoa(v.url);
+            history.pushState({v:'player', url:v.url}, v.title, `?v=${safe}`);
+            document.title = v.title;
+            document.getElementById('p-title').innerText = v.title;
+
+            renderRelated();
+
+            if(art) art.destroy();
             
-            if (isM3U) {
-                parseM3U(video.url);
-            } else {
-                document.getElementById('playlist-ui').style.display = 'none';
-                initArt(video.url, video.image);
-            }
-        }
-
-        async function parseM3U(url) {
-            const ui = document.getElementById('playlist-ui');
-            ui.style.display = 'block';
-            ui.innerHTML = 'Loading Playlist...';
-            
-            try {
-                // Try direct, then proxy
-                let text = "";
-                try {
-                    const r = await fetch(url);
-                    if (!r.ok) throw new Error();
-                    text = await r.text();
-                } catch {
-                    const r = await fetch(DATA_PROXY + encodeURIComponent(url));
-                    text = await r.text();
-                }
-
-                const lines = text.split('\n');
-                let items = [];
-                let name = "Episode";
-
-                lines.forEach(line => {
-                    line = line.trim();
-                    if (line.startsWith('#EXTINF:')) {
-                        name = line.split(',')[1] || "Episode";
-                    } else if (line && !line.startsWith('#')) {
-                        items.push({ name: name, url: line });
-                    }
-                });
-
-                ui.innerHTML = '';
-                items.forEach((item, idx) => {
-                    const div = document.createElement('div');
-                    div.className = 'pl-item';
-                    div.innerHTML = `<i class="fas fa-play" style="font-size:10px; margin-right:8px;"></i> ${idx+1}. ${item.name}`;
-                    div.onclick = () => {
-                        initArt(item.url);
-                        document.querySelectorAll('.pl-item').forEach(x => x.style.color = 'white');
-                        div.style.color = 'var(--primary)';
-                    };
-                    ui.appendChild(div);
-                });
-
-                // Play first
-                if (items.length > 0) initArt(items[0].url);
-
-            } catch (e) {
-                ui.innerHTML = "Failed to load playlist.";
-                initArt(url); // Fallback
-            }
-        }
-
-        function initArt(url, poster) {
-            if (art) art.destroy();
-            
-            // Manual Quality Selector setup requires HLS events
             art = new Artplayer({
                 container: '#artplayer',
-                url: url,
-                poster: poster || '',
-                theme: '#ff9900',
+                url: v.url,
+                poster: v.image || '',
                 autoplay: true,
-                muted: false,
-                pip: true,
+                theme: '#ff9000',
                 fullscreen: true,
+                miniProgressBar: true,
                 setting: true,
+                flip: true,
+                playbackRate: true,
+                aspectRatio: true,
                 customType: {
-                    m3u8: function (video, url, art) {
-                        if (Hls.isSupported()) {
-                            if (hls) hls.destroy();
+                    m3u8: function(video, url, art) {
+                        if(Hls.isSupported()) {
+                            if(hls) hls.destroy();
                             hls = new Hls();
                             hls.loadSource(url);
                             hls.attachMedia(video);
-                            
-                            // Quality Switching
-                            hls.on(Hls.Events.MANIFEST_PARSED, (event, data) => {
-                                const levels = data.levels.map((level, index) => {
+                            hls.on(Hls.Events.MANIFEST_PARSED, (ev, data) => {
+                                let levels = data.levels.map((level, index) => {
                                     return {
-                                        html: level.height + 'P',
+                                        html: (level.height || 'Auto') + 'P',
                                         index: index,
                                     };
                                 });
-                                // Add Quality Menu
                                 if(levels.length > 1) {
                                     art.controls.add({
-                                        name: 'quality',
-                                        index: 10,
-                                        position: 'right',
-                                        html: 'Auto',
-                                        selector: [{html: 'Auto', index: -1}, ...levels],
-                                        onSelect: function (item) {
-                                            hls.currentLevel = item.index;
-                                            return item.html;
-                                        },
+                                        name: 'quality', index: 10, position: 'right', html: 'Auto',
+                                        selector: [{html:'Auto', index:-1}, ...levels],
+                                        onSelect: function(item) { hls.currentLevel = item.index; return item.html; }
                                     });
                                 }
                             });
-                        } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+                        } else if(video.canPlayType('application/vnd.apple.mpegurl')) {
                             video.src = url;
-                        } else {
-                            art.notice.show = 'Format not supported';
                         }
                     }
                 }
             });
             
-            // On Error -> Try Proxy
             art.on('error', () => {
-                if (!url.includes(DATA_PROXY)) {
-                    art.switchUrl(DATA_PROXY + encodeURIComponent(url));
-                }
+                if(!v.url.includes(PROXY_API)) art.switchUrl(PROXY_API + encodeURIComponent(v.url));
+            });
+        }
+
+        function renderRelated() {
+            let grid = document.getElementById('related-grid');
+            grid.innerHTML = '';
+            // Only show videos, not playlists in related
+            let related = masterData.filter(x => !isPlaylistType(x)).sort(() => 0.5 - Math.random()).slice(0, 8);
+            
+            related.forEach(v => {
+                let div = document.createElement('div');
+                div.className = 'card';
+                let img = v.image || 'https://via.placeholder.com/320x180/111/444?text=NetBongo';
+                div.innerHTML = `
+                    <div class="thumb-box">
+                        <img class="thumb" src="${img}" loading="lazy" onerror="this.src='${IMG_PROXY+encodeURIComponent(img)}'">
+                        <span class="duration">HD</span>
+                    </div>
+                    <div class="info">
+                        <h3 class="title">${v.title}</h3>
+                        <div class="meta">${Math.floor(Math.random()*900)}K views</div>
+                    </div>
+                `;
+                div.onclick = () => loadPlayer(v);
+                grid.appendChild(div);
             });
         }
 
         // --- NAVIGATION ---
-        function goHome() {
-            document.getElementById('player-section').style.display = 'none';
-            document.getElementById('home-section').style.display = 'block';
-            if (art) art.pause();
-            
-            // Clean URL
-            history.pushState({ page: 'home' }, "NetBongo", window.location.pathname);
+        function switchView(view) {
+            document.getElementById('home-view').style.display = 'none';
+            document.getElementById('playlist-view').style.display = 'none';
+            document.getElementById('player-view').style.display = 'none';
+            document.getElementById('sticky-nav').style.display = 'none';
+
+            if(view === 'home') {
+                document.getElementById('home-view').style.display = 'block';
+                document.getElementById('sticky-nav').style.display = 'flex';
+            } else if(view === 'playlist') {
+                document.getElementById('playlist-view').style.display = 'block';
+            } else {
+                document.getElementById('player-view').style.display = 'block';
+            }
+            if(view !== 'player' && art) art.pause();
         }
 
-        // Handle Back Button
-        window.onpopstate = (event) => {
-            if (event.state && event.state.page === 'player') {
-                // Stay on player (if needed logic)
-            } else {
-                goHome();
-            }
+        function goHome() {
+            switchView('home');
+            history.pushState({v:'home'}, "Home", window.location.pathname);
+            document.title = "NetBongo - Premium Hub";
+        }
+        
+        function goBackLogic() {
+            if(lastView === 'playlist') history.back();
+            else goHome();
+        }
+
+        window.onpopstate = (e) => {
+            if(!e.state || e.state.v === 'home') goHome();
         };
 
         function shareVideo() {
-            if (navigator.share) {
-                navigator.share({
-                    title: document.title,
-                    url: window.location.href
-                });
-            } else {
-                navigator.clipboard.writeText(window.location.href);
-                alert('Link Copied!');
-            }
+            if(navigator.share) navigator.share({title:document.title, url:window.location.href});
+            else { navigator.clipboard.writeText(window.location.href); alert('Link Copied!'); }
         }
     </script>
 </body>
