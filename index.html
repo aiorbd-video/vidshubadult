@@ -1,1 +1,656 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>NetBongo - Premium Video Hub</title>
+    <meta name="theme-color" content="#000000">
+    <meta name="description" content="Watch premium viral videos for free. Best quality streaming.">
+    
+    <!-- Open Graph for SEO -->
+    <meta property="og:site_name" content="NetBongo">
+    <meta property="og:title" content="NetBongo Premium">
+    <meta property="og:description" content="Watch viral videos now.">
+    <meta property="og:type" content="website">
+    
+    <!-- Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/artplayer/dist/artplayer.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/hls.js/1.5.8/hls.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        :root {
+            --primary: #ff9000;
+            --bg: #000000;
+            --surface: #1b1b1b;
+            --text: #ffffff;
+            --gray: #6f6f6f;
+        }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
+        
+        body {
+            margin: 0; padding: 0;
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: Arial, sans-serif;
+            overflow-x: hidden;
+            padding-bottom: 60px;
+        }
+
+        /* 18+ Modal */
+        #entry-modal {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #000; z-index: 99999;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            text-align: center; padding: 20px;
+        }
+        .entry-box {
+            border: 2px solid var(--primary); padding: 30px; border-radius: 8px;
+            background: #111; max-width: 400px; width: 100%;
+        }
+        .entry-btn {
+            background: var(--primary); color: black; border: none;
+            padding: 12px 30px; font-size: 16px; font-weight: bold;
+            margin-top: 20px; cursor: pointer; border-radius: 4px;
+            text-transform: uppercase; width: 100%;
+        }
+        .bangla-notice {
+            color: #ff4444; font-size: 14px; margin-top: 15px; 
+            border: 1px dashed #ff4444; padding: 10px; border-radius: 4px;
+        }
+
+        /* Header */
+        header {
+            background: #000; padding: 12px 15px;
+            display: flex; align-items: center; justify-content: space-between;
+            border-bottom: 1px solid #333; position: sticky; top: 0; z-index: 100;
+        }
+        .logo { font-size: 24px; font-weight: 900; color: white; cursor: pointer; letter-spacing: -1px; }
+        .logo span { background: var(--primary); color: black; padding: 0 5px; border-radius: 3px; margin-left: 2px; }
+
+        /* Sticky Tabs */
+        .sticky-nav {
+            background: #000; padding: 10px 15px;
+            position: sticky; top: 54px; z-index: 90;
+            border-bottom: 1px solid #333;
+            display: flex; gap: 10px; overflow-x: auto;
+            scrollbar-width: none;
+        }
+        .cat-tab {
+            background: #333; color: #fff;
+            padding: 8px 18px; border-radius: 30px;
+            font-size: 14px; font-weight: bold; white-space: nowrap; cursor: pointer;
+            transition: 0.2s; border: 1px solid transparent;
+        }
+        .cat-tab.active { background: #fff; color: #000; border-color: #fff; }
+
+        /* Grid System */
+        .container { max-width: 1400px; margin: 0 auto; padding: 10px; }
+        
+        .video-grid {
+            display: grid;
+            grid-template-columns: 1fr; /* Mobile: Single Column */
+            gap: 20px;
+        }
+        @media (min-width: 600px) {
+            .video-grid { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; }
+        }
+        @media (min-width: 900px) {
+            .video-grid { grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
+        }
+
+        .card { cursor: pointer; position: relative; background: #000; border-radius: 6px; overflow: hidden; }
+        .thumb-box {
+            position: relative; width: 100%; padding-top: 56.25%; /* 16:9 */
+            background: #111; overflow: hidden;
+        }
+        .thumb {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            object-fit: cover;
+        }
+
+        /* Badges */
+        .badge-pl {
+             position: absolute; bottom: 0; right: 0; 
+             background: rgba(255, 144, 0, 0.95);
+             color: black; padding: 4px 10px;
+             font-size: 11px; font-weight: 800;
+             display: flex; align-items: center; gap: 5px;
+             border-top-left-radius: 6px; text-transform: uppercase;
+        }
+        .duration {
+            position: absolute; bottom: 5px; right: 5px;
+            background: rgba(0,0,0,0.8); color: white;
+            padding: 2px 5px; font-size: 11px; border-radius: 2px; font-weight: bold;
+        }
+
+        .info { padding: 12px 5px; }
+        .title {
+            font-size: 15px; color: #fff; margin: 0;
+            display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+            overflow: hidden; line-height: 1.4; font-weight: 500;
+        }
+        .meta { font-size: 12px; color: var(--gray); margin-top: 5px; display:flex; justify-content:space-between; }
+
+        /* Views */
+        #home-view, #playlist-view, #player-view { display: none; }
+
+        /* Player */
+        .player-container {
+            width: 100%; aspect-ratio: 16/9; background: #000;
+            position: relative; z-index: 10; margin-bottom: 10px;
+        }
+        .artplayer-app { width: 100%; height: 100%; }
+
+        .video-main-info { padding-bottom: 15px; border-bottom: 1px solid #333; }
+        .vid-h1 { font-size: 18px; color: #fff; margin: 0 0 10px 0; line-height: 1.4; }
+        
+        .actions { display: flex; gap: 10px; margin-top: 15px; }
+        .act-btn {
+            background: #333; color: white; border: none; padding: 10px 15px; flex: 1;
+            border-radius: 4px; font-weight: bold; font-size: 14px; cursor: pointer;
+            display: flex; align-items: center; justify-content: center; gap: 5px;
+        }
+        .act-btn.dl { color: #28a745; }
+
+        /* Playlist Folder View */
+        .pl-header { padding: 10px 0; border-bottom: 1px solid #333; margin-bottom: 15px; }
+        .pl-title { font-size: 20px; color: var(--primary); margin:0; }
+
+        /* Ads */
+        .ad-native { width: 100%; min-height: 80px; background: #111; margin: 10px 0; display:flex; justify-content:center; align-items:center; }
+        .ad-banner { margin: 20px auto; text-align: center; }
+
+        .load-more {
+            display: block; width: 100%; padding: 15px;
+            background: #222; color: var(--primary);
+            border: 1px solid #333; text-align: center;
+            margin-top: 20px; font-weight: bold; cursor: pointer;
+        }
+        
+        /* Custom Back Button in UI (Optional) */
+        .nav-back {
+            display: inline-flex; align-items: center; gap: 5px;
+            padding: 10px 0; color: #aaa; font-size: 14px; cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 18+ Modal -->
+    <div id="entry-modal">
+        <div class="entry-box">
+            <h1 style="color:var(--primary); margin:0 0 10px 0;">WARNING 18+</h1>
+            <p style="color:#ccc;">This site contains adult material.</p>
+            <div class="bangla-notice">
+                ভিডিও লোড না হলে ভিপিএন ব্যাবহার করুন।<br>
+                <span style="color:#ccc; font-size:12px;">(Use VPN if video doesn't load)</span>
+            </div>
+            <button class="entry-btn" onclick="enterSite()">I am 18+ - Enter</button>
+        </div>
+    </div>
+
+    <!-- Header -->
+    <header>
+        <div class="logo" onclick="goHome()">Net<span>Bongo</span></div>
+        <div style="font-size:18px; color:white;"><i class="fas fa-search"></i></div>
+    </header>
+
+    <!-- Sticky Tabs (Playlist Tab Removed) -->
+    <div id="sticky-nav" class="sticky-nav">
+        <div class="cat-tab active" onclick="filterData('all', this)">All Videos</div>
+        <div class="cat-tab" onclick="filterData('trending', this)">Trending</div>
+        <div class="cat-tab" onclick="filterData('hd', this)">HD Porn</div>
+    </div>
+
+    <div class="container">
+
+        <!-- Native Ad -->
+        <div class="ad-native">
+            <script async="async" data-cfasync="false" src="https://momrollback.com/b88712e5e1e497d39ecedaffd47492bc/invoke.js"></script>
+            <div id="container-b88712e5e1e497d39ecedaffd47492bc"></div>
+        </div>
+
+        <!-- Home View -->
+        <div id="home-view">
+            <div class="video-grid" id="grid"></div>
+            <div class="load-more" id="btn-more" onclick="loadMore()">Show More Videos</div>
+        </div>
+
+        <!-- Playlist View (Folder) -->
+        <div id="playlist-view">
+            <div class="nav-back" onclick="window.history.back()"><i class="fas fa-arrow-left"></i> Back</div>
+            <div class="pl-header">
+                <h2 class="pl-title" id="pl-title">Playlist</h2>
+                <span id="pl-count" style="color:#666; font-size:12px;">Loading...</span>
+            </div>
+            <div class="video-grid" id="pl-grid"></div>
+        </div>
+
+        <!-- Player View -->
+        <div id="player-view">
+            <div class="nav-back" onclick="window.history.back()"><i class="fas fa-arrow-left"></i> Back</div>
+
+            <div class="player-container">
+                <div class="artplayer-app" id="artplayer"></div>
+            </div>
+
+            <div class="video-main-info">
+                <h1 class="vid-h1" id="p-title">Loading...</h1>
+                <div class="meta" style="display:flex; justify-content:space-between;">
+                    <span><i class="fas fa-eye"></i> 1.5M Views</span>
+                    <span><i class="fas fa-thumbs-up"></i> 98%</span>
+                </div>
+                
+                <div class="actions">
+                    <button class="act-btn" onclick="shareVideo()"><i class="fas fa-share"></i> Share</button>
+                    <a href="https://momrollback.com/jnt0mwiv7?key=c244b66638c840b3570508593d8b468e" target="_blank" class="act-btn dl">
+                        <i class="fas fa-download"></i> Download
+                    </a>
+                </div>
+            </div>
+
+            <!-- 300x250 Ad -->
+            <div class="ad-banner">
+                <script type="text/javascript">
+                    atOptions = { 'key' : 'efc3a9ebdeba69b64a361554582f3008', 'format' : 'iframe', 'height' : 250, 'width' : 300, 'params' : {} };
+                </script>
+                <script type="text/javascript" src="https://momrollback.com/efc3a9ebdeba69b64a361554582f3008/invoke.js"></script>
+            </div>
+
+            <!-- Related Videos -->
+            <div style="margin: 20px 0; border-left: 4px solid var(--primary); padding-left: 10px; font-size: 18px; font-weight: bold;">
+                Recommended For You
+            </div>
+            <div class="video-grid" id="related-grid"></div>
+        </div>
+
+    </div>
+
+    <script>
+        // --- CONFIG ---
+        const CSV_LINK = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTugOQXwLIGyVofFlvFLKN7E_PNemCkIDcdwB4dGcoP16gOnTcmJ2iSM5lr_YFVPts1Fbc5g5gkvE4S/pub?output=csv";
+        const PROXY_API = "https://netbong.aiorbd.workers.dev/?url=";
+        const IMG_PROXY = "https://img-allinone.netlify.app/.netlify/functions/proxy?url=";
+
+        let masterData = [];
+        let activeData = [];
+        let page = 1;
+        let art = null;
+        let hls = null;
+
+        // SCROLL & HISTORY MANAGEMENT
+        let homeScrollY = 0;
+        let playlistScrollY = 0;
+
+        // --- INIT ---
+        window.addEventListener('DOMContentLoaded', () => {
+            if(localStorage.getItem('nb_v6_fixed')) {
+                document.getElementById('entry-modal').style.display = 'none';
+                init();
+            }
+        });
+
+        function enterSite() {
+            localStorage.setItem('nb_v6_fixed', 'true');
+            document.getElementById('entry-modal').style.display = 'none';
+            // Inject Ads
+            let s1 = document.createElement('script'); s1.src = "https://momrollback.com/02/f8/86/02f886f4ac6dd52755b96f56e54b4d57.js"; document.body.appendChild(s1);
+            let s2 = document.createElement('script'); s2.src = "https://momrollback.com/dc/95/4d/dc954dbecf4b21d37cedb37de585cf99.js"; document.body.appendChild(s2);
+            
+            // Set initial history state to prevent exit on first back press
+            history.replaceState({view: 'home'}, document.title, window.location.pathname);
+            
+            init();
+        }
+
+        async function init() {
+            try {
+                let txt = "";
+                try {
+                    let r = await fetch(CSV_LINK);
+                    if(!r.ok) throw new Error();
+                    txt = await r.text();
+                } catch {
+                    let r = await fetch(PROXY_API + encodeURIComponent(CSV_LINK));
+                    txt = await r.text();
+                }
+
+                let p = Papa.parse(txt, {header:true, skipEmptyLines:true});
+                masterData = p.data.filter(x => x.url && x.title).sort(() => Math.random() - 0.5);
+                
+                // Deep Link Handler
+                let q = new URLSearchParams(window.location.search);
+                let encV = q.get('v');
+                let encP = q.get('p');
+
+                filterData('all'); // Initialize Home
+
+                if(encV) {
+                    try {
+                        let url = atob(encV);
+                        let item = masterData.find(x => x.url === url) || {url:url, title:'Video', type:'auto'};
+                        loadPlayer(item);
+                    } catch { }
+                } else if(encP) {
+                     try {
+                        let url = atob(encP);
+                        let item = masterData.find(x => x.url === url) || {url:url, title:'Playlist', type:'m3u'};
+                        openPlaylist(item);
+                    } catch { }
+                }
+
+            } catch(e) { console.log(e); }
+        }
+
+        function isPlaylistType(item) {
+            const url = item.url.toLowerCase();
+            const type = (item.type || '').toLowerCase();
+            if (url.includes('.m3u8')) return false;
+            if (url.endsWith('.m3u')) return true;
+            if (type.includes('m3u') && !type.includes('m3u8')) return true;
+            return false;
+        }
+
+        // --- HOME LOGIC ---
+        function filterData(cat, el) {
+            if(el) {
+                document.querySelectorAll('.cat-tab').forEach(x => x.classList.remove('active'));
+                el.classList.add('active');
+            }
+
+            if(cat === 'all') activeData = masterData;
+            else if(cat === 'trending') activeData = [...masterData].sort(() => Math.random() - 0.5);
+            else if(cat === 'hd') activeData = masterData.filter(x => !isPlaylistType(x));
+
+            page = 1;
+            document.getElementById('grid').innerHTML = '';
+            
+            // Reset view to home but keep scroll logic simple for filter change
+            document.getElementById('home-view').style.display = 'block';
+            document.getElementById('playlist-view').style.display = 'none';
+            document.getElementById('player-view').style.display = 'none';
+            document.getElementById('sticky-nav').style.display = 'flex';
+            
+            loadMore();
+            window.scrollTo(0,0);
+        }
+
+        function loadMore() {
+            let start = (page-1)*20;
+            let end = start + 20;
+            let items = activeData.slice(start, end);
+
+            if(items.length === 0) {
+                document.getElementById('btn-more').style.display = 'none';
+                return;
+            } else document.getElementById('btn-more').style.display = 'block';
+
+            let grid = document.getElementById('grid');
+            items.forEach(v => {
+                let div = document.createElement('div');
+                div.className = 'card';
+                
+                let isPL = isPlaylistType(v);
+                let img = v.image || 'https://via.placeholder.com/320x180/111/444?text=NetBongo';
+                let dur = Math.floor(Math.random()*20)+5 + ":" + Math.floor(Math.random()*59).toString().padStart(2,'0');
+                let plCount = Math.floor(Math.random()*15)+5;
+
+                div.innerHTML = `
+                    <div class="thumb-box">
+                        <img class="thumb" src="${img}" loading="lazy" onerror="this.src='${IMG_PROXY+encodeURIComponent(img)}'">
+                        ${isPL ? `<div class="badge-pl"><i class="fas fa-layer-group"></i> ${plCount} VIDEOS</div>` : `<span class="duration">${dur}</span>`}
+                    </div>
+                    <div class="info">
+                        <h3 class="title">${v.title}</h3>
+                        <div class="meta">
+                            <span>${Math.floor(Math.random()*900)}K views</span>
+                            <span>98%</span>
+                        </div>
+                    </div>
+                `;
+                div.onclick = () => {
+                    if(isPL) openPlaylist(v);
+                    else loadPlayer(v);
+                };
+                grid.appendChild(div);
+            });
+            page++;
+        }
+
+        // --- PLAYLIST LOGIC ---
+        async function openPlaylist(v) {
+            // Save scroll position of Home
+            homeScrollY = window.scrollY;
+
+            // Update UI
+            document.getElementById('home-view').style.display = 'none';
+            document.getElementById('sticky-nav').style.display = 'none';
+            document.getElementById('player-view').style.display = 'none';
+            document.getElementById('playlist-view').style.display = 'block';
+            
+            window.scrollTo(0,0);
+            
+            // Push History State
+            let safe = btoa(v.url);
+            history.pushState({view: 'playlist', url: v.url}, v.title, `?p=${safe}`);
+            updateSEO(v.title, v.image);
+
+            document.getElementById('pl-title').innerText = v.title;
+            document.getElementById('pl-count').innerText = "Loading videos...";
+            document.getElementById('pl-grid').innerHTML = '<div style="color:white; padding:20px; text-align:center;">Fetching content...</div>';
+
+            try {
+                let txt = "";
+                try {
+                    let r = await fetch(v.url);
+                    if(!r.ok) throw new Error();
+                    txt = await r.text();
+                } catch {
+                    let r = await fetch(PROXY_API + encodeURIComponent(v.url));
+                    txt = await r.text();
+                }
+
+                let lines = txt.split('\n');
+                let list = [];
+                let t = "Episode";
+                lines.forEach(l => {
+                    l = l.trim();
+                    if(l.startsWith('#EXTINF:')) t = l.split(',')[1] || "Episode";
+                    else if(l && !l.startsWith('#')) {
+                        list.push({title:t, url:l, image:v.image});
+                        t = "Episode";
+                    }
+                });
+
+                document.getElementById('pl-count').innerText = list.length + " Videos";
+                let grid = document.getElementById('pl-grid');
+                grid.innerHTML = '';
+                
+                list.forEach((item, idx) => {
+                    let div = document.createElement('div');
+                    div.className = 'card';
+                    let img = item.image || `https://via.placeholder.com/320x180/333/orange?text=EP+${idx+1}`;
+                    div.innerHTML = `
+                        <div class="thumb-box">
+                            <img class="thumb" src="${img}" loading="lazy">
+                            <span class="duration">EP ${idx+1}</span>
+                        </div>
+                        <div class="info"><h3 class="title">${item.title}</h3></div>
+                    `;
+                    div.onclick = () => loadPlayer(item);
+                    grid.appendChild(div);
+                });
+
+            } catch(e) {
+                document.getElementById('pl-grid').innerHTML = "Failed to load playlist.";
+            }
+        }
+
+        // --- PLAYER LOGIC ---
+        function loadPlayer(v) {
+            // Check where we came from to save correct scroll
+            if(document.getElementById('home-view').style.display === 'block') {
+                homeScrollY = window.scrollY;
+            } else if (document.getElementById('playlist-view').style.display === 'block') {
+                playlistScrollY = window.scrollY;
+            }
+
+            // Update UI
+            document.getElementById('home-view').style.display = 'none';
+            document.getElementById('sticky-nav').style.display = 'none';
+            document.getElementById('playlist-view').style.display = 'none';
+            document.getElementById('player-view').style.display = 'block';
+
+            window.scrollTo(0,0);
+
+            // Push History State
+            let safe = btoa(v.url);
+            history.pushState({view: 'player', url: v.url}, v.title, `?v=${safe}`);
+            updateSEO(v.title, v.image);
+
+            document.getElementById('p-title').innerText = v.title;
+            renderRelated();
+
+            if(art) art.destroy();
+            
+            art = new Artplayer({
+                container: '#artplayer',
+                url: v.url,
+                poster: v.image || '',
+                autoplay: true,
+                theme: '#ff9000',
+                fullscreen: true,
+                miniProgressBar: true,
+                setting: true,
+                flip: true,
+                playbackRate: true,
+                aspectRatio: true,
+                customType: {
+                    m3u8: function(video, url, art) {
+                        if(Hls.isSupported()) {
+                            if(hls) hls.destroy();
+                            hls = new Hls();
+                            hls.loadSource(url);
+                            hls.attachMedia(video);
+                            hls.on(Hls.Events.MANIFEST_PARSED, (ev, data) => {
+                                let levels = data.levels.map((level, index) => {
+                                    return {
+                                        html: (level.height || 'Auto') + 'P',
+                                        index: index,
+                                    };
+                                });
+                                if(levels.length > 1) {
+                                    art.controls.add({
+                                        name: 'quality', index: 10, position: 'right', html: 'Auto',
+                                        selector: [{html:'Auto', index:-1}, ...levels],
+                                        onSelect: function(item) { hls.currentLevel = item.index; return item.html; }
+                                    });
+                                }
+                            });
+                        } else if(video.canPlayType('application/vnd.apple.mpegurl')) {
+                            video.src = url;
+                        }
+                    }
+                }
+            });
+            
+            art.on('error', () => {
+                if(!v.url.includes(PROXY_API)) art.switchUrl(PROXY_API + encodeURIComponent(v.url));
+            });
+        }
+
+        function renderRelated() {
+            let grid = document.getElementById('related-grid');
+            grid.innerHTML = '';
+            let related = masterData.filter(x => !isPlaylistType(x)).sort(() => 0.5 - Math.random()).slice(0, 8);
+            
+            related.forEach(v => {
+                let div = document.createElement('div');
+                div.className = 'card';
+                let img = v.image || 'https://via.placeholder.com/320x180/111/444?text=NetBongo';
+                div.innerHTML = `
+                    <div class="thumb-box">
+                        <img class="thumb" src="${img}" loading="lazy" onerror="this.src='${IMG_PROXY+encodeURIComponent(img)}'">
+                        <span class="duration">HD</span>
+                    </div>
+                    <div class="info"><h3 class="title">${v.title}</h3></div>
+                `;
+                div.onclick = () => loadPlayer(v); // Open in same player
+                grid.appendChild(div);
+            });
+        }
+
+        function goHome() {
+            document.getElementById('home-view').style.display = 'block';
+            document.getElementById('sticky-nav').style.display = 'flex';
+            document.getElementById('playlist-view').style.display = 'none';
+            document.getElementById('player-view').style.display = 'none';
+            
+            if(art) art.pause();
+            
+            updateSEO("NetBongo - Premium Video Hub", null);
+            // Restore Home Scroll
+            window.scrollTo(0, homeScrollY);
+        }
+
+        // --- BACK BUTTON HANDLER (POPSTATE) ---
+        window.onpopstate = function(event) {
+            if (event.state) {
+                const view = event.state.view;
+                
+                // Hide All
+                document.getElementById('home-view').style.display = 'none';
+                document.getElementById('sticky-nav').style.display = 'none';
+                document.getElementById('playlist-view').style.display = 'none';
+                document.getElementById('player-view').style.display = 'none';
+                if(art) art.pause();
+
+                if (view === 'home') {
+                    document.getElementById('home-view').style.display = 'block';
+                    document.getElementById('sticky-nav').style.display = 'flex';
+                    window.scrollTo(0, homeScrollY); // Restore Position
+                } 
+                else if (view === 'playlist') {
+                    document.getElementById('playlist-view').style.display = 'block';
+                    // If we stored playlist scroll, restore it, else top
+                    // We assume navigation back to playlist means top or previous position if managed
+                    window.scrollTo(0, 0); 
+                } 
+                else if (view === 'player') {
+                    document.getElementById('player-view').style.display = 'block';
+                    // Re-init player logic if needed or just show div (div is static, so just showing is fine)
+                }
+            } else {
+                // Fallback to home if no state
+                goHome();
+            }
+        };
+
+        // --- SEO & SHARING ---
+        function updateSEO(title, image) {
+            document.title = title;
+            // Update Open Graph (Client Side)
+            document.querySelector('meta[property="og:title"]').setAttribute("content", title);
+            if(image) document.querySelector('meta[property="og:image"]').setAttribute("content", image);
+        }
+
+        function shareVideo() {
+            if(navigator.share) {
+                navigator.share({
+                    title: document.title,
+                    url: window.location.href
+                });
+            } else {
+                navigator.clipboard.writeText(window.location.href);
+                alert('Link Copied to Clipboard!');
+            }
+        }
+    </script>
+</body>
+</html>
+
+
 
