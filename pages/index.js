@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { PlayCircle, Menu, Home, Search, Share2, ListVideo } from 'lucide-react';
 
 // === CONFIGURATION ===
@@ -6,7 +6,17 @@ const SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTugOQXwLIGyV
 const PROXY_URL = "https://netbongo.aiorbd.workers.dev/?url=";
 const SMARTLINK = "https://momrollback.com/jnt0mwiv7?key=c244b66638c840b3570508593d8b468e";
 
-// --- SEO META UPDATER ---
+// --- URL HASH GENERATOR (ভিডিওর জন্য ইউনিক আইডি তৈরি) ---
+const generateId = (str) => {
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+        hash = (hash << 5) - hash + str.charCodeAt(i);
+        hash &= hash; 
+    }
+    return Math.abs(hash).toString(36);
+};
+
+// --- SEO META UPDATER (সোশ্যাল মিডিয়া প্রিভিউ আপডেট) ---
 const updateSEO = (title, image, url) => {
     document.title = title ? `${title} - Netbongo` : 'Netbongo - Stream Free';
     
@@ -167,7 +177,6 @@ export default function App() {
 
     // --- AUTO TAILWIND INJECTOR & SCRIPTS ---
     useEffect(() => {
-        // Fix for Next.js missing Tailwind setup
         if (!document.getElementById('tailwind-cdn')) {
             const script = document.createElement('script');
             script.id = 'tailwind-cdn';
@@ -192,42 +201,60 @@ export default function App() {
             } catch (err) {
                 console.error("Data load error:", err);
                 setError(true);
-            } finally {
                 setLoading(false);
             }
         };
 
         loadScriptsAndData();
-        updateSEO(); 
     }, []);
 
-    // --- RELIABLE CSV PARSER FOR ORIGINAL TITLE ---
+    // --- BROWSER BACK BUTTON (POPSTATE) HANDLER ---
+    useEffect(() => {
+        const handlePopState = () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const videoId = urlParams.get('v');
+            if (videoId && videos.length > 0) {
+                const foundVideo = videos.find(v => v.id === videoId);
+                if (foundVideo) {
+                    handleNavigate('watch', foundVideo, false);
+                }
+            } else {
+                handleNavigate('home', null, false);
+            }
+        };
+
+        window.addEventListener('popstate', handlePopState);
+        return () => window.removeEventListener('popstate', handlePopState);
+    }, [videos]);
+
+    // --- CSV PARSER ---
     const parseCSV = async (text) => {
         const lines = text.split('\n').filter(l => l.trim().length > 0);
         let allVids = [];
         let pLists = {};
 
         for (let i = 1; i < lines.length; i++) {
-            // Regex handles commas inside quotes safely
             const row = lines[i].split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
             if (row && row.length >= 2) {
                 const clean = str => str ? str.replace(/^"|"$/g, '').trim() : '';
                 
-                // ORIGINAL TITLE FROM SHEET
                 const title = clean(row[0]) || 'Untitled Video'; 
                 const url = clean(row[1]);
                 
                 if (url) {
                     const type = clean(row[2]) || 'Video';
                     const image = clean(row[3]) || `https://placehold.co/600x400/1e1e1e/FFF?text=${encodeURIComponent(title.substring(0, 2))}`;
-                    const duration = clean(row[4]) || null; // LIVE removed completely
+                    const duration = clean(row[4]) || null; 
                     const uploadDate = clean(row[5]) || null;
 
                     const isM3U = url.endsWith('.m3u') || url.endsWith('.m3u_plus') || type.toLowerCase().includes('m3u');
                     const isM3U8 = url.includes('.m3u8') || type.toLowerCase().includes('m3u8');
                     
+                    // Generate a static unique ID based on the URL
+                    const uniqueId = generateId(url);
+
                     const item = { 
-                        id: Math.random().toString(36).substr(2, 9),
+                        id: uniqueId,
                         title: title, 
                         url: url, 
                         type: type, 
@@ -250,9 +277,23 @@ export default function App() {
                 }
             }
         }
+        
         allVids.sort(() => 0.5 - Math.random());
         setVideos(allVids);
         setPlaylists(pLists);
+        setLoading(false);
+
+        // Check if there is a video ID in the URL on first load
+        const urlParams = new URLSearchParams(window.location.search);
+        const videoId = urlParams.get('v');
+        if (videoId) {
+            const foundVideo = allVids.find(v => v.id === videoId);
+            if (foundVideo) {
+                handleNavigate('watch', foundVideo, false);
+            }
+        } else {
+            updateSEO();
+        }
     };
 
     const parseM3UContent = (content, category) => {
@@ -265,12 +306,11 @@ export default function App() {
                 const logo = line.match(/tvg-logo="([^"]*)"/);
                 if (logo) current.image = logo[1];
                 const parts = line.split(',');
-                // Robust title extraction
                 current.title = parts.slice(1).join(',').trim() || 'Untitled Channel';
             } else if (line && !line.startsWith('#')) {
                 current.url = line;
                 if (!current.image) current.image = `https://placehold.co/600x400/1e1e1e/FFF?text=${encodeURIComponent(current.title?.substring(0, 2) || 'TV')}`;
-                current.id = Math.random().toString(36).substr(2, 9);
+                current.id = generateId(current.url);
                 if (current.title && current.url) items.push({ ...current });
                 current = { type: category, image: '', duration: null };
             }
@@ -287,15 +327,53 @@ export default function App() {
         return source;
     }, [videos, playlists, activeCategory, searchQuery]);
 
-    const handleNavigate = (view, video = null) => {
+    // URL পরিবর্তন এবং নেভিগেশন নিয়ন্ত্রণ
+    const handleNavigate = useCallback((view, video = null, pushState = true) => {
         if (video) {
             setActiveVideo(video);
-            updateSEO(video.title, video.image, video.url);
+            const videoUrl = `${window.location.origin}${window.location.pathname}?v=${video.id}`;
+            updateSEO(video.title, video.image, videoUrl);
+            
+            if (pushState) {
+                window.history.pushState({ view: 'watch', id: video.id }, '', `?v=${video.id}`);
+            }
         } else {
             updateSEO();
+            if (pushState) {
+                window.history.pushState({ view: 'home' }, '', window.location.pathname);
+            }
         }
         setCurrentView(view);
         window.scrollTo(0, 0);
+    }, []);
+
+    // সোশ্যাল মিডিয়া শেয়ার ফাংশন
+    const handleShare = async () => {
+        const shareUrl = window.location.href;
+        const shareData = {
+            title: activeVideo?.title || 'Netbongo Video',
+            text: 'Watch this awesome video on Netbongo!',
+            url: shareUrl
+        };
+
+        try {
+            if (navigator.share && window.isSecureContext) {
+                await navigator.share(shareData);
+            } else {
+                await navigator.clipboard.writeText(shareUrl);
+                alert('Link copied to clipboard! Share it on Facebook, Telegram, etc.');
+            }
+        } catch (err) {
+            console.error("Error sharing:", err);
+            // Fallback for non-secure contexts (http)
+            const textArea = document.createElement("textarea");
+            textArea.value = shareUrl;
+            document.body.appendChild(textArea);
+            textArea.select();
+            document.execCommand("Copy");
+            textArea.remove();
+            alert('Link copied to clipboard!');
+        }
     };
 
     const handleLoadMore = () => {
@@ -348,7 +426,6 @@ export default function App() {
                     <div className="mt-auto p-4 flex justify-center"><AdBanner type="300x250" /></div>
                 </aside>
                 
-                {/* Mobile Overlay */}
                 {isSidebarOpen && <div className="fixed inset-0 bg-black/60 z-30 md:hidden" onClick={() => setIsSidebarOpen(false)}></div>}
 
                 {/* MAIN CONTENT AREA */}
@@ -379,7 +456,6 @@ export default function App() {
                                                     <div onClick={() => handleNavigate('watch', video)} className="group cursor-pointer flex flex-col gap-2">
                                                         <div className="relative w-full aspect-video rounded-xl overflow-hidden bg-[#222]">
                                                             <img src={video.image} alt={video.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200" />
-                                                            {/* Original Duration (LIVE removed) */}
                                                             {video.duration && (
                                                                 <span className="absolute bottom-1 right-1 bg-black/80 text-white text-xs font-medium px-1.5 py-0.5 rounded">
                                                                     {video.duration}
@@ -389,14 +465,11 @@ export default function App() {
                                                         <div className="flex gap-3 mt-1 pr-2">
                                                             <div className="w-9 h-9 rounded-full bg-[#333] flex items-center justify-center text-xs font-bold shrink-0 text-gray-300 border border-[#444]">{video.title.substring(0,1).toUpperCase()}</div>
                                                             <div>
-                                                                {/* ORIGINAL TITLE */}
                                                                 <h3 className="text-white text-base font-medium line-clamp-2 leading-tight group-hover:text-red-500 transition-colors">{video.title}</h3>
-                                                                {/* Original Meta */}
                                                                 <div className="text-sm text-gray-400 mt-1">{video.type} {video.uploadDate && `• ${video.uploadDate}`}</div>
                                                             </div>
                                                         </div>
                                                     </div>
-                                                    {/* In-Grid Ad every 8 videos */}
                                                     {(idx + 1) % 8 === 0 && (
                                                         <div className="col-span-full py-4 border-t border-b border-[#272727] my-4 flex justify-center"><AdBanner type="300x250" /></div>
                                                     )}
@@ -429,7 +502,9 @@ export default function App() {
                                                 <div className="w-10 h-10 bg-red-600 rounded-full flex items-center justify-center font-bold">N</div>
                                                 <div><h3 className="font-bold text-sm">Netbongo</h3></div>
                                             </div>
-                                            <button className="bg-[#272727] hover:bg-[#3f3f3f] px-4 py-1.5 rounded-full text-sm font-medium flex items-center gap-2 transition-colors"><Share2 size={16} /> Share</button>
+                                            <button onClick={handleShare} className="bg-[#272727] hover:bg-[#3f3f3f] px-4 py-1.5 rounded-full text-sm font-medium flex items-center gap-2 transition-colors">
+                                                <Share2 size={16} /> Share
+                                            </button>
                                         </div>
                                         
                                         <div className="w-full mt-6 flex justify-center"><AdBanner type="300x250" /></div>
@@ -450,7 +525,7 @@ export default function App() {
                                                 </div>
                                                 <div>
                                                     <h4 className="text-sm font-medium line-clamp-2 leading-tight group-hover:text-red-500 transition-colors">{v.title}</h4>
-                                                    <div className="text-xs text-gray-400 mt-1">{v.type}</div>
+                                                    <div className="text-xs text-gray-400 mt-1">{v.type} {v.uploadDate && `• ${v.uploadDate}`}</div>
                                                 </div>
                                             </div>
                                         ))}
