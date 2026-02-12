@@ -1,6 +1,7 @@
-import { getVideos } from '@/utils/data';
+import { getVideos } from '../utils/data'; // <-- Fixed Path
 import Link from 'next/link';
-import AdBanner from '@/components/AdBanner';
+import React from 'react';
+import AdBanner from '../components/AdBanner'; // <-- Fixed Path
 
 export default async function HomePage() {
     const videos = await getVideos();
@@ -39,7 +40,7 @@ export default async function HomePage() {
             </div>
 
             <div className="flex justify-center mt-10">
-                <a href={SMARTLINK} target="_blank" className="bg-[#272727] hover:bg-[#3f3f3f] text-white font-medium py-2 px-8 rounded-full transition border border-[#303030]">Load more</a>
+                <a href={SMARTLINK} target="_blank" rel="noreferrer" className="bg-[#272727] hover:bg-[#3f3f3f] text-white font-medium py-2 px-8 rounded-full transition border border-[#303030]">Load more</a>
             </div>
         </div>
     );
