@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
-import { PlayCircle, Menu, Home, Search, Share2, ChevronDown, ListVideo } from 'lucide-react';
+import { PlayCircle, Menu, Home, Search, Share2, ListVideo } from 'lucide-react';
 
 // === CONFIGURATION ===
 const SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTugOQXwLIGyVofFlvFLKN7E_PNemCkIDcdwB4dGcoP16gOnTcmJ2iSM5lr_YFVPts1Fbc5g5gkvE4S/pub?output=csv";
 const PROXY_URL = "https://netbongo.aiorbd.workers.dev/?url=";
 const SMARTLINK = "https://momrollback.com/jnt0mwiv7?key=c244b66638c840b3570508593d8b468e";
 
-// --- SEO META UPDATER FOR NEXT.JS SIMULATION ---
+// --- SEO META UPDATER ---
 const updateSEO = (title, image, url) => {
     document.title = title ? `${title} - Netbongo` : 'Netbongo - Stream Free';
     
@@ -30,15 +30,20 @@ const updateSEO = (title, image, url) => {
 // --- ADSTERRA COMPONENTS ---
 const GlobalAds = () => {
     useEffect(() => {
-        const popunder = document.createElement('script');
-        popunder.src = "https://momrollback.com/02/f8/86/02f886f4ac6dd52755b96f56e54b4d57.js";
-        popunder.async = true;
-        document.body.appendChild(popunder);
-
-        const socialbar = document.createElement('script');
-        socialbar.src = "https://momrollback.com/dc/95/4d/dc954dbecf4b21d37cedb37de585cf99.js";
-        socialbar.async = true;
-        document.body.appendChild(socialbar);
+        if (!document.getElementById('ad-popunder')) {
+            const popunder = document.createElement('script');
+            popunder.id = 'ad-popunder';
+            popunder.src = "https://momrollback.com/02/f8/86/02f886f4ac6dd52755b96f56e54b4d57.js";
+            popunder.async = true;
+            document.body.appendChild(popunder);
+        }
+        if (!document.getElementById('ad-socialbar')) {
+            const socialbar = document.createElement('script');
+            socialbar.id = 'ad-socialbar';
+            socialbar.src = "https://momrollback.com/dc/95/4d/dc954dbecf4b21d37cedb37de585cf99.js";
+            socialbar.async = true;
+            document.body.appendChild(socialbar);
+        }
     }, []);
     return null;
 };
@@ -61,6 +66,7 @@ const AdBanner = ({ type }) => {
                 style={{ width: type === 'native' ? '100%' : '300px', height: type === 'native' ? '100px' : '250px', border: 'none' }}
                 sandbox="allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox"
                 scrolling="no"
+                title={`ad-${type}`}
             />
         </div>
     );
@@ -79,7 +85,7 @@ const ArtPlayerComponent = ({ video, onBack }) => {
             poster: video.image,
             title: video.title,
             volume: 1.0,
-            isLive: false, // Force seekbar to appear even for streams, true duration will be fetched
+            isLive: false, // Force seekbar
             autoplay: true,
             pip: true,
             fullscreen: true,
@@ -129,7 +135,6 @@ const ArtPlayerComponent = ({ video, onBack }) => {
             }
         });
 
-        // Add back button inside player
         art.layers.add({
             name: 'back',
             html: '<div style="background:rgba(0,0,0,0.6);padding:8px;border-radius:50%;cursor:pointer;"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg></div>',
@@ -138,13 +143,13 @@ const ArtPlayerComponent = ({ video, onBack }) => {
         });
 
         return () => { if (art && art.destroy) art.destroy(false); };
-    }, [video]);
+    }, [video, onBack]);
 
     return <div ref={artRef} className="w-full aspect-video bg-black rounded-xl overflow-hidden shadow-2xl z-10 relative"></div>;
 };
 
 // ============================================================================
-// MAIN APPLICATION (Next.js Blueprint)
+// MAIN APPLICATION
 // ============================================================================
 
 export default function App() {
@@ -153,15 +158,23 @@ export default function App() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(false);
 
-    // Routing State
     const [currentView, setCurrentView] = useState('home'); 
     const [activeVideo, setActiveVideo] = useState(null);
     const [activeCategory, setActiveCategory] = useState('All');
     const [searchQuery, setSearchQuery] = useState('');
     const [displayCount, setDisplayCount] = useState(12);
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
-    // --- DATA FETCHING ---
+    // --- AUTO TAILWIND INJECTOR & SCRIPTS ---
     useEffect(() => {
+        // Fix for Next.js missing Tailwind setup
+        if (!document.getElementById('tailwind-cdn')) {
+            const script = document.createElement('script');
+            script.id = 'tailwind-cdn';
+            script.src = 'https://cdn.tailwindcss.com';
+            document.head.appendChild(script);
+        }
+
         const loadScriptsAndData = async () => {
             if (!window.Artplayer) {
                 await Promise.all([
@@ -171,12 +184,10 @@ export default function App() {
             }
 
             try {
-                // Rule: ONLY use proxy for CSV loading
                 const finalUrl = PROXY_URL + encodeURIComponent(SHEET_URL);
                 const res = await fetch(finalUrl);
                 if (!res.ok) throw new Error("Fetch failed");
                 const csvText = await res.text();
-                
                 parseCSV(csvText);
             } catch (err) {
                 console.error("Data load error:", err);
@@ -190,45 +201,48 @@ export default function App() {
         updateSEO(); 
     }, []);
 
+    // --- RELIABLE CSV PARSER FOR ORIGINAL TITLE ---
     const parseCSV = async (text) => {
-        const lines = text.split('\n').filter(l => l.trim());
+        const lines = text.split('\n').filter(l => l.trim().length > 0);
         let allVids = [];
         let pLists = {};
 
-        // Start from 1 to skip header
         for (let i = 1; i < lines.length; i++) {
-            const parts = lines[i].match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g);
-            if (parts && parts.length >= 2) {
+            // Regex handles commas inside quotes safely
+            const row = lines[i].split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
+            if (row && row.length >= 2) {
                 const clean = str => str ? str.replace(/^"|"$/g, '').trim() : '';
-                const url = clean(parts[1]);
+                
+                // ORIGINAL TITLE FROM SHEET
+                const title = clean(row[0]) || 'Untitled Video'; 
+                const url = clean(row[1]);
                 
                 if (url) {
-                    const title = clean(parts[0]);
-                    const type = clean(parts[2] || 'Video');
-                    const image = clean(parts[3] || '');
-                    
-                    // Support for Optional Column 5 (Duration) and Column 6 (Upload Date) if added in sheet
-                    const duration = parts[4] ? clean(parts[4]) : null;
-                    const uploadDate = parts[5] ? clean(parts[5]) : null;
+                    const type = clean(row[2]) || 'Video';
+                    const image = clean(row[3]) || `https://placehold.co/600x400/1e1e1e/FFF?text=${encodeURIComponent(title.substring(0, 2))}`;
+                    const duration = clean(row[4]) || null; // LIVE removed completely
+                    const uploadDate = clean(row[5]) || null;
 
                     const isM3U = url.endsWith('.m3u') || url.endsWith('.m3u_plus') || type.toLowerCase().includes('m3u');
                     const isM3U8 = url.includes('.m3u8') || type.toLowerCase().includes('m3u8');
                     
                     const item = { 
                         id: Math.random().toString(36).substr(2, 9),
-                        title, url, type, image,
-                        // If stream, show LIVE, else use sheet duration or nothing (null)
-                        duration: (isM3U || isM3U8) && !duration ? 'LIVE' : duration,
+                        title: title, 
+                        url: url, 
+                        type: type, 
+                        image: image,
+                        duration: duration, 
                         uploadDate: uploadDate
                     };
                     
                     if (isM3U && !isM3U8) {
                         try {
-                            const res = await fetch(url); // Direct fetch as per rule, only proxy CSV
+                            const res = await fetch(url);
                             const content = await res.text();
                             pLists[title] = parseM3UContent(content, title);
                         } catch (e) {
-                            console.warn("M3U direct fetch failed for", title);
+                            console.warn("M3U fetch failed for", title);
                         }
                     } else {
                         allVids.push(item);
@@ -244,20 +258,21 @@ export default function App() {
     const parseM3UContent = (content, category) => {
         const lines = content.split('\n');
         const items = [];
-        let current = { type: category, image: '', duration: 'LIVE' };
+        let current = { type: category, image: '', duration: null };
         lines.forEach(line => {
             line = line.trim();
             if (line.startsWith('#EXTINF:')) {
                 const logo = line.match(/tvg-logo="([^"]*)"/);
                 if (logo) current.image = logo[1];
                 const parts = line.split(',');
-                current.title = parts[parts.length - 1].trim();
+                // Robust title extraction
+                current.title = parts.slice(1).join(',').trim() || 'Untitled Channel';
             } else if (line && !line.startsWith('#')) {
                 current.url = line;
-                if (!current.image) current.image = `https://placehold.co/600x400/111/FFF?text=${encodeURIComponent(current.title?.substring(0, 2) || 'TV')}`;
+                if (!current.image) current.image = `https://placehold.co/600x400/1e1e1e/FFF?text=${encodeURIComponent(current.title?.substring(0, 2) || 'TV')}`;
                 current.id = Math.random().toString(36).substr(2, 9);
                 if (current.title && current.url) items.push({ ...current });
-                current = { type: category, image: '', duration: 'LIVE' };
+                current = { type: category, image: '', duration: null };
             }
         });
         return items;
@@ -284,31 +299,31 @@ export default function App() {
     };
 
     const handleLoadMore = () => {
-        window.open(SMARTLINK, '_blank'); // Smartlink Trigger for Revenue
+        window.open(SMARTLINK, '_blank'); 
         setDisplayCount(prev => prev + 12);
     };
 
     return (
-        <div className="bg-[#0f0f0f] text-white min-h-screen font-sans">
+        <div className="bg-[#0f0f0f] text-white min-h-screen font-sans selection:bg-red-600 selection:text-white">
             <GlobalAds />
 
             {/* HEADER */}
             <header className="h-14 bg-[#0f0f0f] flex items-center justify-between px-4 fixed w-full z-50 border-b border-[#272727]">
                 <div className="flex items-center gap-4">
-                    <button className="p-2 hover:bg-[#272727] rounded-full transition hidden md:block"><Menu size={24}/></button>
+                    <button onClick={() => setIsSidebarOpen(!isSidebarOpen)} className="p-2 hover:bg-[#272727] rounded-full transition md:hidden"><Menu size={24}/></button>
                     <div onClick={() => handleNavigate('home')} className="flex items-center gap-1 cursor-pointer">
                         <div className="bg-red-600 text-white p-1 rounded-lg"><PlayCircle size={20} /></div>
                         <span className="text-xl font-bold tracking-tighter hidden sm:block">Netbongo</span>
                     </div>
                 </div>
                 <div className="flex-1 max-w-xl mx-4">
-                    <div className="flex w-full bg-[#121212] border border-[#303030] rounded-full overflow-hidden focus-within:border-blue-500">
+                    <div className="flex w-full bg-[#121212] border border-[#303030] rounded-full overflow-hidden focus-within:border-gray-500 transition-colors">
                         <input 
                             type="text" 
-                            placeholder="Search videos..." 
+                            placeholder="Search original videos..." 
                             value={searchQuery}
                             onChange={(e) => { setSearchQuery(e.target.value); handleNavigate('home'); }}
-                            className="w-full bg-transparent px-4 py-2 focus:outline-none"
+                            className="w-full bg-transparent px-4 py-2 focus:outline-none text-white"
                         />
                         <button className="bg-[#222] px-5 border-l border-[#303030] hover:bg-[#303030]"><Search size={18} className="text-gray-400"/></button>
                     </div>
@@ -317,21 +332,24 @@ export default function App() {
 
             <div className="flex pt-14 h-full">
                 {/* SIDEBAR */}
-                <aside className="w-60 bg-[#0f0f0f] hidden md:flex flex-col h-[calc(100vh-56px)] overflow-y-auto fixed z-40 border-r border-[#272727]">
+                <aside className={`w-60 bg-[#0f0f0f] flex-col h-[calc(100vh-56px)] overflow-y-auto fixed z-40 border-r border-[#272727] transform transition-transform duration-200 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0 md:flex`}>
                     <div className="p-3 space-y-1">
-                        <button onClick={() => handleNavigate('home')} className="w-full flex items-center gap-4 px-3 py-2 bg-[#272727] rounded-lg transition">
+                        <button onClick={() => { handleNavigate('home'); setIsSidebarOpen(false); }} className="w-full flex items-center gap-4 px-3 py-2 hover:bg-[#272727] rounded-lg transition text-left">
                             <Home size={20} /> <span className="text-sm font-medium">Home</span>
                         </button>
                         <div className="h-[1px] bg-[#272727] my-2"></div>
                         <h3 className="px-3 text-sm font-bold text-gray-400 mb-2 uppercase">Playlists</h3>
                         {Object.keys(playlists).map(name => (
-                            <button key={name} onClick={() => { setActiveCategory(name); handleNavigate('home'); }} className="w-full flex items-center gap-3 px-3 py-2 text-sm text-gray-400 hover:bg-[#272727] hover:text-white rounded-lg truncate text-left">
+                            <button key={name} onClick={() => { setActiveCategory(name); handleNavigate('home'); setIsSidebarOpen(false); }} className="w-full flex items-center gap-3 px-3 py-2 text-sm text-gray-400 hover:bg-[#272727] hover:text-white rounded-lg truncate text-left transition">
                                 <ListVideo size={18} /> <span className="truncate">{name}</span>
                             </button>
                         ))}
                     </div>
                     <div className="mt-auto p-4 flex justify-center"><AdBanner type="300x250" /></div>
                 </aside>
+                
+                {/* Mobile Overlay */}
+                {isSidebarOpen && <div className="fixed inset-0 bg-black/60 z-30 md:hidden" onClick={() => setIsSidebarOpen(false)}></div>}
 
                 {/* MAIN CONTENT AREA */}
                 <main className="flex-1 md:ml-60 w-full min-h-screen">
@@ -339,7 +357,6 @@ export default function App() {
                     {/* HOME PAGE */}
                     {currentView === 'home' && (
                         <div className="animate-fade-in">
-                            {/* Categories Bar */}
                             <div className="sticky top-14 bg-[#0f0f0f]/95 backdrop-blur-md z-30 px-4 py-3 flex gap-3 overflow-x-auto border-b border-[#272727]">
                                 <button onClick={() => setActiveCategory('All')} className={`px-4 py-1.5 rounded-lg text-sm font-medium whitespace-nowrap transition ${activeCategory === 'All' ? 'bg-[#f1f1f1] text-black' : 'bg-[#272727] text-white hover:bg-[#3f3f3f]'}`}>All</button>
                                 {Object.keys(playlists).map(name => (
@@ -362,23 +379,24 @@ export default function App() {
                                                     <div onClick={() => handleNavigate('watch', video)} className="group cursor-pointer flex flex-col gap-2">
                                                         <div className="relative w-full aspect-video rounded-xl overflow-hidden bg-[#222]">
                                                             <img src={video.image} alt={video.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200" />
-                                                            {/* Only show duration if original data exists */}
+                                                            {/* Original Duration (LIVE removed) */}
                                                             {video.duration && (
-                                                                <span className={`absolute bottom-1 right-1 ${video.duration === 'LIVE' ? 'bg-red-600' : 'bg-black/80'} text-white text-xs font-medium px-1.5 py-0.5 rounded`}>
+                                                                <span className="absolute bottom-1 right-1 bg-black/80 text-white text-xs font-medium px-1.5 py-0.5 rounded">
                                                                     {video.duration}
                                                                 </span>
                                                             )}
                                                         </div>
                                                         <div className="flex gap-3 mt-1 pr-2">
-                                                            <div className="w-9 h-9 rounded-full bg-[#333] flex items-center justify-center text-xs font-bold shrink-0">{video.title.substring(0,1).toUpperCase()}</div>
+                                                            <div className="w-9 h-9 rounded-full bg-[#333] flex items-center justify-center text-xs font-bold shrink-0 text-gray-300 border border-[#444]">{video.title.substring(0,1).toUpperCase()}</div>
                                                             <div>
-                                                                <h3 className="text-white text-base font-medium line-clamp-2 leading-tight">{video.title}</h3>
-                                                                {/* Only show category and original upload date (if exists) */}
+                                                                {/* ORIGINAL TITLE */}
+                                                                <h3 className="text-white text-base font-medium line-clamp-2 leading-tight group-hover:text-red-500 transition-colors">{video.title}</h3>
+                                                                {/* Original Meta */}
                                                                 <div className="text-sm text-gray-400 mt-1">{video.type} {video.uploadDate && `• ${video.uploadDate}`}</div>
                                                             </div>
                                                         </div>
                                                     </div>
-                                                    {/* Ad injection every 8 videos */}
+                                                    {/* In-Grid Ad every 8 videos */}
                                                     {(idx + 1) % 8 === 0 && (
                                                         <div className="col-span-full py-4 border-t border-b border-[#272727] my-4 flex justify-center"><AdBanner type="300x250" /></div>
                                                     )}
@@ -411,7 +429,7 @@ export default function App() {
                                                 <div className="w-10 h-10 bg-red-600 rounded-full flex items-center justify-center font-bold">N</div>
                                                 <div><h3 className="font-bold text-sm">Netbongo</h3></div>
                                             </div>
-                                            <button className="bg-[#272727] hover:bg-[#3f3f3f] px-4 py-1.5 rounded-full text-sm font-medium flex items-center gap-2"><Share2 size={16} /> Share</button>
+                                            <button className="bg-[#272727] hover:bg-[#3f3f3f] px-4 py-1.5 rounded-full text-sm font-medium flex items-center gap-2 transition-colors"><Share2 size={16} /> Share</button>
                                         </div>
                                         
                                         <div className="w-full mt-6 flex justify-center"><AdBanner type="300x250" /></div>
@@ -425,14 +443,14 @@ export default function App() {
                                         {videos.filter(v => v.id !== activeVideo.id).slice(0, 10).map(v => (
                                             <div key={v.id} onClick={() => handleNavigate('watch', v)} className="cursor-pointer group flex flex-col gap-2 mb-2">
                                                 <div className="relative w-full aspect-video rounded-xl overflow-hidden bg-[#222]">
-                                                    <img src={v.image} alt={v.title} className="w-full h-full object-cover" />
+                                                    <img src={v.image} alt={v.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200" />
                                                     {v.duration && (
-                                                        <span className={`absolute bottom-1 right-1 ${v.duration === 'LIVE' ? 'bg-red-600' : 'bg-black/80'} text-[10px] font-medium px-1.5 py-0.5 rounded`}>{v.duration}</span>
+                                                        <span className="absolute bottom-1 right-1 bg-black/80 text-[10px] text-white font-medium px-1.5 py-0.5 rounded">{v.duration}</span>
                                                     )}
                                                 </div>
                                                 <div>
-                                                    <h4 className="text-sm font-medium line-clamp-2 leading-tight group-hover:text-gray-300">{v.title}</h4>
-                                                    <div className="text-xs text-gray-400 mt-1">{v.type} {v.uploadDate && `• ${v.uploadDate}`}</div>
+                                                    <h4 className="text-sm font-medium line-clamp-2 leading-tight group-hover:text-red-500 transition-colors">{v.title}</h4>
+                                                    <div className="text-xs text-gray-400 mt-1">{v.type}</div>
                                                 </div>
                                             </div>
                                         ))}
