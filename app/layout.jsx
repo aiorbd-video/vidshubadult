@@ -1,7 +1,7 @@
 import './globals.css';
 import Link from 'next/link';
 import { PlayCircle, Home, Search } from 'lucide-react';
-import AdBanner from '@/components/AdBanner';
+import AdBanner from '../components/AdBanner'; // <-- Fixed Path
 
 export const metadata = {
   title: 'Netbongo - Stream Video',
