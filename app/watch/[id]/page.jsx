@@ -1,4 +1,4 @@
-import { getVideos } from '@/utils/data';
+import { getVideos } from '../../../utils/data'; // <-- Fixed Path
 import WatchClient from './WatchClient';
 
 // === DYNAMIC SEO META TAGS FOR SOCIAL MEDIA ===
